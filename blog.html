@@ -1,0 +1,6090 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>QiHua·blog</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Highlight.js 语法高亮库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 全局滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a1018;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a3a4a;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3e5568;
+        }
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #2a3a4a #0a1018;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #03050b;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #f0ede2;
+        }
+
+        #starsCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(ellipse at center, #0a0f1f 0%, #020408 100%);
+            display: block;
+        }
+
+        .home-wrapper {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 2rem 8rem;
+        }
+
+        .welcome-core {
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            transition: opacity 0.9s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.8s ease;
+            backdrop-filter: blur(2px);
+            background: rgba(5, 10, 20, 0.3);
+            padding: 2rem 3rem;
+            border-radius: 80px;
+            border: 1px solid rgba(255,215,150,0.2);
+            box-shadow: 0 0 60px rgba(0,20,40,0.6);
+        }
+
+        .welcome-core.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        .greeting-text {
+            font-family: 'Merriweather', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FEE140, #FA709A, #FFDEE9, #B4F0FF);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(255,200,100,0.6);
+            margin-bottom: 2rem;
+            letter-spacing: 2px;
+        }
+
+        .nav-options {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .blog-entry-btn {
+            background: rgba(15, 25, 45, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 200, 120, 0.6);
+            border-radius: 60px;
+            padding: 12px 36px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffefdb;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 1px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .blog-entry-btn:hover {
+            transform: translateY(-6px);
+            background: rgba(45, 70, 110, 0.8);
+            border-color: #ffdd99;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+            color: white;
+        }
+
+        .progress-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            z-index: 20;
+            padding: 1.5rem 2rem 2rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            backdrop-filter: blur(6px);
+        }
+
+        .progress-container {
+            width: 80%;
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .progress-track {
+            background: rgba(30, 40, 60, 0.5);
+            border-radius: 60px;
+            height: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #3a7bd5, #00d2ff, #6ee7ff);
+            border-radius: 60px;
+            transition: width 0.06s linear;
+        }
+
+        .progress-glow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0%;
+            height: 280%;
+            background: radial-gradient(circle, rgba(70,180,255,0.8) 0%, rgba(30,100,200,0) 85%);
+            filter: blur(12px);
+            transition: width 0.08s ease, left 0.08s ease;
+        }
+
+        .loading-hint {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: #aab3c2;
+            letter-spacing: 1px;
+        }
+
+        /* 文章页面 */
+        .blog-subpage {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 7, 18, 0.96);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            overflow-y: auto;
+            padding: 2rem 2rem 3rem;
+            display: none;
+            color: #e6e2db;
+        }
+        
+        .blog-subpage::-webkit-scrollbar {
+            width: 8px;
+        }
+        .blog-subpage::-webkit-scrollbar-track {
+            background: #0a1018;
+            border-radius: 10px;
+        }
+        .blog-subpage::-webkit-scrollbar-thumb {
+            background: #2a3a4a;
+            border-radius: 10px;
+        }
+        
+        .blog-subpage.active-page {
+            display: block;
+        }
+        
+        .subpage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #2e3f55;
+            padding-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .back-home-btn {
+            background: #1f2a36;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 40px;
+            color: #ffdaaa;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        
+        .back-home-btn:hover {
+            background: #3e4e62;
+        }
+        
+        .subpage-title {
+            font-size: 2rem;
+            font-family: 'Merriweather', serif;
+            background: linear-gradient(120deg, #f9d976, #f39f86);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        /* 筛选栏 */
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            background: #1a2532;
+            border: 1px solid #ffcd9455;
+            border-radius: 60px;
+            padding: 12px 18px;
+            color: #e9f0e8;
+            font-size: 0.9rem;
+        }
+        
+        .search-box input::placeholder {
+            color: #8a7e68;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            border-color: #00d2ff;
+            box-shadow: 0 0 8px rgba(0,210,255,0.3);
+        }
+        
+        .search-box button, .category-select {
+            background: #1a2532;
+            border: 1px solid #ffcd9455;
+            border-radius: 60px;
+            padding: 0 20px;
+            color: #ffefdb;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .search-box button:hover {
+            background: #2a3a4a;
+            border-color: #00d2ff;
+        }
+        
+        .category-select select {
+            background: #1a2532;
+            border: none;
+            color: #ffefdb;
+            padding: 12px 8px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        /* 文章卡片 - 无代码预览 */
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .article-card {
+            background: #111a24cc;
+            backdrop-filter: blur(8px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 200, 150, 0.3);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .article-card:hover {
+            transform: translateY(-5px);
+            border-color: #ffbc6e;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+        }
+        
+        .card-header {
+            padding: 1rem 1.2rem 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,200,150,0.2);
+        }
+        
+        .category-badge {
+            background: rgba(255,200,120,0.2);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #ffd7a0;
+        }
+        
+        .date-tag {
+            font-size: 0.7rem;
+            color: #9a8e72;
+        }
+        
+        .article-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 1rem 1.2rem;
+            color: #ffefdb;
+            line-height: 1.4;
+        }
+        
+        /* 文章卡片底部提示 */
+        .read-hint {
+            padding: 0.8rem 1.2rem 1rem;
+            font-size: 0.7rem;
+            color: #7d6e55;
+            border-top: 1px solid rgba(255,200,150,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .read-hint i {
+            font-size: 0.7rem;
+        }
+        
+        .empty-placeholder {
+            text-align: center;
+            padding: 4rem;
+            background: rgba(20,30,45,0.5);
+            border-radius: 48px;
+            color: #9a8e72;
+        }
+
+        /* 友圈样式 */
+        .friend-list-sub {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+        }
+        
+        .friend-item-sub {
+            background: #0f1822cc;
+            backdrop-filter: blur(8px);
+            border-radius: 32px;
+            padding: 1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid #3f5568;
+            transition: 0.2s;
+        }
+        
+        .friend-item-sub:hover {
+            border-color: #ffbc6e;
+            transform: translateY(-2px);
+        }
+        
+        .friend-avatar-blog {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #c9ae86, #a0815a);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            color: #1a1a2e;
+        }
+        
+        .friend-info-blog {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .friend-name-blog {
+            font-weight: 600;
+        }
+        
+        .friend-url-blog {
+            font-size: 0.7rem;
+            color: #bcb0a0;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        .friend-url-blog a {
+            color: #bcb0a0;
+            text-decoration: none;
+        }
+        
+        .friend-url-blog a:hover {
+            color: #ffbc6e;
+        }
+        
+        .search-friend-area {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 1.8rem;
+            flex-wrap: wrap;
+        }
+        
+        .search-input-sub {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 60px;
+            background: #1a2532;
+            border: 1px solid #ffcd9455;
+            color: #f0e6d8;
+        }
+        
+        .btn-add-sub {
+            background: #c1863e;
+            border: none;
+            border-radius: 60px;
+            padding: 0 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #fff1e0;
+            transition: 0.2s;
+        }
+        
+        .btn-add-sub:hover {
+            background: #d49a52;
+            transform: translateY(-2px);
+        }
+        
+        .about-card-sub {
+            background: #0e1722cc;
+            backdrop-filter: blur(8px);
+            border-radius: 48px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid #ffcd94;
+        }
+
+        /* 模态框 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-card {
+            background: #1b232f;
+            border-radius: 36px;
+            width: 90%;
+            max-width: 850px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ffddb0;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid #ffcd94;
+        }
+        
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #ffbc6e;
+            transition: 0.2s;
+        }
+        
+        .modal-close-btn:hover {
+            color: #ffdd99;
+            transform: scale(1.1);
+        }
+        
+        .modal-body-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        
+        .modal-body-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-body-scroll::-webkit-scrollbar-track {
+            background: #0a1018;
+            border-radius: 10px;
+        }
+        .modal-body-scroll::-webkit-scrollbar-thumb {
+            background: #2a3a4a;
+            border-radius: 10px;
+        }
+        
+        .modal-body-scroll pre {
+            background: #0a0e16;
+            border-radius: 16px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .modal-body-scroll pre code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+        }
+        
+        u, .u {
+            text-decoration: underline;
+            text-decoration-skip-ink: none;
+        }
+
+        @media (max-width: 680px) {
+            .greeting-text { font-size: 1.8rem; }
+            .blog-entry-btn { padding: 8px 18px; font-size: 1rem; }
+            .articles-grid { grid-template-columns: 1fr; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .welcome-core { padding: 1rem 1.5rem; }
+            .subpage-title { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="starsCanvas"></canvas>
+
+<div class="home-wrapper" id="homeScreen">
+    <div class="welcome-core" id="welcomeCore">
+        <div class="greeting-text">✨ 欢迎来到我的博客 ✨</div>
+        <div class="nav-options">
+            <div class="blog-entry-btn" data-nav="articles"><i class="fas fa-book-open"></i> 文章</div>
+            <div class="blog-entry-btn" data-nav="about"><i class="fas fa-user-astronaut"></i> 关于</div>
+            <div class="blog-entry-btn" data-nav="friends"><i class="fas fa-user-friends"></i> 友圈</div>
+        </div>
+    </div>
+</div>
+
+<div class="progress-footer">
+    <div class="progress-container">
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+            <div class="progress-glow" id="progressGlow"></div>
+        </div>
+        <div class="loading-hint" id="loadingHint">✦ 星辰汇聚 · 开启墨言 ✦</div>
+    </div>
+</div>
+
+<!-- 文章页面 -->
+<div id="articlesPage" class="blog-subpage">
+    <div class="subpage-header">
+        <h2 class="subpage-title"><i class="fas fa-feather-alt"></i> 文章</h2>
+        <button class="back-home-btn" data-backhome>⌂ 返回首页</button>
+    </div>
+    
+    <div class="filter-bar">
+        <div class="search-box">
+            <input type="text" id="articleSearchInput" placeholder="🔍 搜索文章标题或内容...">
+            <button id="clearSearchBtn"><i class="fas fa-eraser"></i> 清空</button>
+        </div>
+        <div class="category-select">
+            <select id="articleCategorySelect">
+                <option value="all">📚 全部内容</option>
+                <option value="Java">☕ Java </option>
+                <option value="C++">🔄 C++ </option>
+                <option value="C">⚙️ C语言 </option>
+                <option value="Python">🐍 Python </option>
+                <option value="数据结构">🌲 数据结构 </option>
+                <option value="MySQL">🗄️ MySQL </option>
+            </select>
+        </div>
+    </div>
+    
+    <div id="articlesGrid" class="articles-grid"></div>
+</div>
+
+<!-- 关于页面 -->
+<div id="aboutPage" class="blog-subpage">
+    <div class="subpage-header"><h2 class="subpage-title"><i class="fas fa-user"></i> 关于我</h2><button class="back-home-btn" data-backhome>⌂ 返回首页</button></div>
+    <div class="about-card-sub">
+        <i class="fas fa-feather-alt" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+        <h2>祁画</h2>
+        <p style="margin: 1rem 0;">游戏热爱者 · 摄影爱好者 · 代码诗人</p>
+        <p>你好，我是祁画，一个喜欢看世界和镜头记录风景的00后。相信世间万物皆有故事，希望通过这个博客平台，与同样热爱生活与思考的你相遇。</p>
+        <p style="margin-top: 1rem;">如果你也喜欢游戏、摄影或者只是聊聊日常，欢迎在友圈留下足迹。</p>
+    </div>
+</div>
+
+<!-- 友圈页面 -->
+<div id="friendsPage" class="blog-subpage">
+    <div class="subpage-header"><h2 class="subpage-title"><i class="fas fa-user-friends"></i> 挚友</h2><button class="back-home-btn" data-backhome>⌂ 返回首页</button></div>
+    <div class="search-friend-area">
+        <input type="text" id="friendSearchInput" class="search-input-sub" placeholder="🔍 搜索好友...">
+        <button id="openAddModalBtn" class="btn-add-sub"><i class="fas fa-plus"></i> 加好友</button>
+    </div>
+    <div id="friendsListRenderSub" class="friend-list-sub"></div>
+</div>
+
+<!-- 添加好友模态框 -->
+<div id="addFriendModal" class="modal-overlay">
+    <div class="modal-card" style="max-width:500px;">
+        <div class="modal-header"><h3><i class="fas fa-globe"></i> 添加好友</h3><button class="modal-close-btn" id="closeModalBtn">&times;</button></div>
+        <div class="modal-body-scroll">
+            <input type="text" id="modalFriendName" placeholder="好友昵称" style="width:100%; margin-bottom:12px; padding:10px; border-radius:30px; background:#2c3a46; border:1px solid #ffcd9455; color:white;">
+            <input type="url" id="modalFriendUrl" placeholder="博客网址" style="width:100%; margin-bottom:12px; padding:10px; border-radius:30px; background:#2c3a46; border:1px solid #ffcd9455; color:white;">
+            <button class="confirm" id="confirmAddFriendBtn" style="background:#e6b56e; border:none; padding:10px; border-radius:40px; font-weight:bold; cursor:pointer;">验证并添加</button>
+            <div style="font-size:0.7rem; color:#bfb28b; margin-top:8px;">* 网址需要可访问才能添加</div>
+        </div>
+    </div>
+</div>
+
+<!-- 文章阅读模态框 -->
+<div id="articleReaderModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header"><h3 id="readerTitle"></h3><button class="modal-close-btn" id="closeReaderBtn">&times;</button></div>
+        <div class="modal-body-scroll" id="readerBody"></div>
+    </div>
+</div>
+
+<script>
+    // ==================== 星空特效 ====================
+    const canvas = document.getElementById('starsCanvas');
+    let ctx = canvas.getContext('2d');
+    let width, height;
+    let stars = [];
+    const STAR_COUNT = 280;
+    
+    function resizeCanvas() { 
+        width = window.innerWidth; 
+        height = window.innerHeight; 
+        canvas.width = width; 
+        canvas.height = height; 
+    }
+    
+    class Star { 
+        constructor() { 
+            this.x = Math.random() * width; 
+            this.y = Math.random() * height; 
+            this.radius = Math.random() * 2.2 + 0.8; 
+            this.alpha = Math.random() * 0.5 + 0.3; 
+            this.twinkleSpeed = 0.005 + Math.random() * 0.015; 
+            this.twinkleDir = Math.random() > 0.5 ? 1 : -1; 
+        } 
+        update() { 
+            this.alpha += this.twinkleSpeed * this.twinkleDir; 
+            if(this.alpha > 0.9) { this.alpha = 0.9; this.twinkleDir = -1; } 
+            if(this.alpha < 0.2) { this.alpha = 0.2; this.twinkleDir = 1; } 
+        } 
+        draw() { 
+            ctx.beginPath(); 
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); 
+            ctx.fillStyle = `rgba(255, 235, 190, ${this.alpha})`; 
+            ctx.fill(); 
+            ctx.shadowBlur = 4; 
+            ctx.shadowColor = "#fffbd0"; 
+        } 
+    }
+    
+    function initStars() { 
+        stars = []; 
+        for(let i=0; i<STAR_COUNT; i++) stars.push(new Star()); 
+    }
+    
+    function animateStars() { 
+        if(!ctx) return; 
+        ctx.clearRect(0, 0, width, height); 
+        ctx.fillStyle = "#03050b"; 
+        ctx.fillRect(0,0,width,height); 
+        for(let s of stars) { s.update(); s.draw(); } 
+        requestAnimationFrame(animateStars); 
+    }
+    
+    window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
+    resizeCanvas(); 
+    initStars(); 
+    animateStars();
+
+    // ==================== 进度条 ====================
+    let progressAnimationId = null, currentProgress = 0, hasLoadedOnce = false;
+    const progressFill = document.getElementById('progressFill'), glowEl = document.getElementById('progressGlow'), welcomeDiv = document.getElementById('welcomeCore'), loadingHint = document.getElementById('loadingHint');
+    
+    function updateProgressUI(value) { 
+        const percent = Math.min(100, Math.max(0, value)); 
+        if(progressFill) progressFill.style.width = percent + '%'; 
+        if(glowEl) { glowEl.style.left = percent + '%'; glowEl.style.width = '18%'; } 
+        if(percent >= 100 && welcomeDiv && !welcomeDiv.classList.contains('show')) { 
+            welcomeDiv.classList.add('show'); 
+            if(loadingHint) loadingHint.innerText = "✦ 星门已开 · 静候君选 ✦"; 
+            hasLoadedOnce = true; 
+            if(progressAnimationId) cancelAnimationFrame(progressAnimationId); 
+        } else if(loadingHint && percent < 100) loadingHint.innerText = `✦ 星辰汇聚 ${Math.floor(percent)}% · 即将开启 ✦`; 
+    }
+    
+    function startFirstLoadAnimation() { 
+        let startTime = null; 
+        const duration = 5000; 
+        function step(timestamp) { 
+            if(!startTime) startTime = timestamp; 
+            const elapsed = timestamp - startTime; 
+            let p = Math.min(100, (elapsed / duration) * 100); 
+            currentProgress = p; 
+            updateProgressUI(currentProgress); 
+            if(currentProgress < 100) progressAnimationId = requestAnimationFrame(step); 
+            else progressAnimationId = null; 
+        } 
+        progressAnimationId = requestAnimationFrame(step); 
+    }
+    
+    function setProgressFull() {
+        if(progressAnimationId) cancelAnimationFrame(progressAnimationId);
+        currentProgress = 100;
+        updateProgressUI(100);
+        if(welcomeDiv) welcomeDiv.classList.add('show');
+        if(loadingHint) loadingHint.innerText = "✦ 星门已开 · 静候君选 ✦";
+        hasLoadedOnce = true;
+    }
+
+    // ==================== 友圈功能 ====================
+    let friendsList = [];
+    
+    function saveFriends() { localStorage.setItem('blog_friends_v7', JSON.stringify(friendsList)); }
+    
+    function loadFriends() { 
+        const stored = localStorage.getItem('blog_friends_v7'); 
+        if(stored) { 
+            try{ let p = JSON.parse(stored); if(Array.isArray(p)) friendsList = p; } catch(e){} 
+        } 
+        if(!friendsList.length) friendsList = []; 
+        saveFriends(); 
+    }
+    
+    async function isUrlAccessible(url) { 
+        try { 
+            const controller = new AbortController(); 
+            setTimeout(() => controller.abort(), 5000); 
+            await fetch(url, { method: 'HEAD', mode: 'no-cors', signal: controller.signal }); 
+            return true; 
+        } catch(e) { 
+            return new Promise((resolve) => { 
+                const img = new Image(); 
+                img.onload = () => resolve(true); 
+                img.onerror = () => resolve(false); 
+                img.src = url; 
+                setTimeout(() => resolve(false), 4000); 
+            }); 
+        } 
+    }
+    
+    async function addFriendWithVerify(name, blogUrl) { 
+        const trimmedName = name.trim(); 
+        if(!trimmedName) { showToast("昵称不能为空"); return false; } 
+        if(!blogUrl.trim()) { showToast("请输入网址"); return false; } 
+        let validUrl = blogUrl.trim(); 
+        if(!validUrl.startsWith('http://') && !validUrl.startsWith('https://')) validUrl = 'https://' + validUrl; 
+        try { new URL(validUrl); } catch(e) { showToast("网址格式不正确"); return false; } 
+        showToast("验证中..."); 
+        const accessible = await isUrlAccessible(validUrl); 
+        if(!accessible) { showToast("❌ 网址无法访问"); return false; } 
+        if(friendsList.some(f => f.blogUrl === validUrl || f.name === trimmedName)) { showToast("好友已存在"); return false; } 
+        friendsList.push({ id: Date.now() + '-' + Math.random().toString(36).substr(2,6), name: trimmedName, blogUrl: validUrl }); 
+        saveFriends(); 
+        renderFriendsListSub(); 
+        showToast(`✅ 已添加 ${trimmedName}`); 
+        return true; 
+    }
+    
+    function showToast(msg) { 
+        let toast = document.getElementById('customToast'); 
+        if(!toast){ 
+            toast = document.createElement('div'); 
+            toast.id = 'customToast'; 
+            toast.style.position='fixed'; 
+            toast.style.bottom='80px'; 
+            toast.style.left='50%'; 
+            toast.style.transform='translateX(-50%)'; 
+            toast.style.backgroundColor='#1e2a36'; 
+            toast.style.color='#ffdfaa'; 
+            toast.style.padding='10px 24px'; 
+            toast.style.borderRadius='60px'; 
+            toast.style.zIndex='3000'; 
+            toast.style.backdropFilter='blur(8px)'; 
+            document.body.appendChild(toast); 
+        } 
+        toast.textContent = msg; 
+        toast.style.opacity='1'; 
+        setTimeout(()=>toast.style.opacity='0',2000); 
+    }
+    
+    function escapeHtml(str){ 
+        if(!str) return ''; 
+        return str.replace(/[&<>]/g, function(m){ 
+            if(m==='&') return '&amp;'; 
+            if(m==='<') return '&lt;'; 
+            if(m==='>') return '&gt;'; 
+            return m;
+        }); 
+    }
+    
+    function renderFriendsListSub(keyword=''){ 
+        const container=document.getElementById('friendsListRenderSub'); 
+        if(!container) return; 
+        let filtered = friendsList.filter(f=> f.name.toLowerCase().includes(keyword.toLowerCase()) || (f.blogUrl && f.blogUrl.toLowerCase().includes(keyword.toLowerCase()))); 
+        if(filtered.length === 0) { 
+            container.innerHTML = `<div class="empty-placeholder"><i class="fas fa-user-friends" style="font-size:2rem;"></i><p>暂无好友，点击上方按钮添加吧</p><small style="color:#6a5e4a;">✨ 添加后好友会显示在这里 ✨</small></div>`; 
+            return; 
+        } 
+        container.innerHTML = filtered.map(f=>`<div class="friend-item-sub" data-id="${f.id}"><div class="friend-avatar-blog">${escapeHtml(f.name.charAt(0).toUpperCase())}</div><div class="friend-info-blog"><div class="friend-name-blog">${escapeHtml(f.name)}</div><div class="friend-url-blog"><a href="${escapeHtml(f.blogUrl)}" target="_blank">${escapeHtml(f.blogUrl.length>40 ? f.blogUrl.substring(0,40)+'…' : f.blogUrl)}</a></div></div><i class="fas fa-link" style="color:#b7aa7a;"></i></div>`).join(''); 
+        document.querySelectorAll('.friend-item-sub').forEach(el=>{ 
+            el.addEventListener('dblclick', async ()=>{ 
+                let id = el.getAttribute('data-id'); 
+                let friend = friendsList.find(f=>f.id===id); 
+                if(friend && confirm(`删除好友 “${friend.name}” 吗？`)){ 
+                    friendsList = friendsList.filter(f=>f.id!==id); 
+                    saveFriends(); 
+                    renderFriendsListSub(document.getElementById('friendSearchInput')?.value||''); 
+                    showToast(`已删除 ${friend.name}`); 
+                } 
+            }); 
+        }); 
+    }
+
+    // ==================== 文章数据 ====================
+    const unifiedArticles = [
+    { 
+        id: "a1", 
+        date: "2026年3月7日", 
+        category: "Java", 
+        title: "第一个Java程序",
+        language: "java",
+        fullContent: 
+        `<p><strong>Java</strong>是一种面向对象的编程语言，具有简单、安全、稳定等特点。在语法方面，Java 在内存管理和语法复杂度上相对 C++ 更友好,语法比c语言较为严谨。</p>
+        <p>Java的面向对象特性使得代码更加模块化和可重用，提高了开发效率和代码质量。</p>
+        <p>首先举一个简单的例子，就比如输出Hello World吧：</p>
+        <pre><code class="language-java">
+public class First
+{
+    public static void main(String args[])
+    {
+        System.out.println("Hello World");
+    }
+}
+        </code></pre>
+        <p>可以看到这个程序输出的结果是 <code>Hello World</code></p>
+        <p>主方法（main方法）的组成部分是：<strong>访问修饰符 + 关键字 + 返回类型 + 方法名</strong>，参数是一个数组。</p>
+        <p><code>String args[]</code> 和 <code>String[] args</code> 是一样的，但是相比较之下，<code>String[] args</code> 更好。不过好归好，要看写程序的你觉得哪个写起来更舒服了。</p>
+        <p><s>我习惯使用的是 String args[]</s></p>
+        <p>除此之外，编写Java程序时，应该注意以下几点。</p>
+        <ul style ='padding-left:1em'>
+        <li><strong>大小写敏感</strong>：Java 是大小写敏感的，这就意味着标识符 Hello 与 hello 是不同的。</li>
+        <li><strong>类名</strong>：对于所有的类来说，类名的首字母应该大写。如果类名由若干单词组成，那么每个单词的首字母应该大写，例如：<code>MyFirstJavaClass</code></li>
+        <li><strong>方法名</strong>：所有的方法名都应该以小写字母开头。如果方法名含有若干单词，则后面的每个单词首字母大写。例如：<code>myDogs</code></li>
+        <li><strong>源文件名</strong>：源文件名必须和类名相同。当保存文件的时候，你应该使用类名作为文件名保存（切记 Java 是大小写敏感的，由第一点可知），文件名的后缀为 .java。（如果文件名和类名不相同则会导致编译错误）</li>
+        <li><strong>主方法入口</strong>：所有的 Java 程序由 <code>public static void main(String[] args)</code> 方法开始执行。</li>
+        </ul>
+    `},
+    { 
+        id:"a2", 
+        date:"2026年3月8日", 
+        category:"Java", 
+        title:"基本数据类型和变量",
+        language:"java", 
+        fullContent:
+        `<p>基本数据类型也称简单数据类型，Java中有8种，分为四大类型。</p>
+        <p><ul style='padding-left:1em'><li>逻辑类型：boolean</li><li>整数类型：int，byte，short，long</li><li>字符类型：char</li><li>浮点类型：float，double</li></ul></p>
+        <p><pre><code class ='language-java'>
+public class datatype 
+{
+    public static void main(String args[])
+    {
+        boolean on = true,off = false,isTriangle;
+        int x = 12,y = 0x78ab,z = 0b011,c;
+        byte x1 = -12,tom = 28,你好 = 98,c1;
+        short x2 = 12,y2 = 1234,c2;
+        long width = 12L,height = 2005L,length;
+        char ch = 'A',home = '家',ch1 = '&#92;n';
+        //转义字符，表示换行，由于\是转义字符，所以要表示\\的话本身需要\\,也就是\\\\,所以\\n表示换行
+        char m = 97;//m中存放的是a，a的ASCII值是97
+        float g = 0.05f,g1 = 0.05F;//f,F不能省略
+        double h = 0.2D,h1 = 0.2d,h2 = 0.2;//d，D可以省略
+    }
+}
+        </code></pre></p>
+        <p>了解了数据类型之后，在看一个内容：强制类型转换。</p>
+        <p>强制类型转换是指将一种数据类型的值转换为另一种数据类型的值。在Java中，强制类型转换需要使用括号来指定目标类型。例如：</p>
+        <p><pre><code class = 'language-java'>
+public class t1
+{
+    public static void main(String args[])
+    {
+        double x = 3.14;
+        System.out.println(x);
+
+        int x1 = (int)x;
+        System.out.println(x1);
+    }
+}
+        </code></pre></p>
+        <p>它的格式是这样的：<code>（类型名）要转换的变量/属性/值</code>，也就是代码中的<code>(int)x</code></p>
+        <p>在这个例子中，我们将一个double类型的值3.14强制转换为int类型，结果是3。需要注意的是，强制类型转换可能会导致数据丢失或精度损失，因此在进行强制类型转换时要谨慎。</p>` 
+    },
+    {
+        id:"a3",
+        date:"2026年3月9日",
+        category:"Java",
+        title:"输入输出",
+        language:"java",
+        fullContent:
+        `<p>输入输出是指程序与外部环境进行数据交换的过程。在Java中，输入输出主要通过java.util.Scanner包中的类来实现(至于包是什么，且听下回分解)。常用的输入输出类包括Scanner、BufferedReader、PrintWriter等。</p>
+        <p>例如，我们可以使用Scanner类来获取用户的输入：</p>
+        <p><pre><code class = 'language-java'>
+import java.util.Scanner;
+public class ShuRuShuChu
+{
+    public static void main(String args[])
+    {
+        Scanner reader = new Scanner(System.in);
+        String a = reader.nextLine();
+        System.out.println(a);
+        reader.close();
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们创建了一个Scanner对象来读取用户的输入，然后使用nextLine()方法获取用户输入的一行文本，并将其存储在变量input中,我们再使用<code>System.out.println()</code>方法将用户输入的内容输出到控制台，最后用<code>reader.close()</code>关闭输入流。</p>
+        <p>out可以使用printf()方法输出数据，格式同C语言（包括占位符%s,%d,%f等）<u><code>System.out.printf('%d %f',12,13.6);</code>来输出12 13.6</u>,但是有两个：%md:输出的int型数据占m列；%m.nf:输出的浮点型数据占m列，小数点部分保留n位。</p>` 
+    },
+    { 
+        id:"a4",
+        date:"2026年3月10日",
+        category:"Java",
+        title:"数组，运算符和注释",
+        language:"java",
+        fullContent:
+        `<p>数组是指一组相同类型的数据的集合。在Java中，数组是一种对象，可以存储多个值。数组的长度在创建时确定，并且不能改变。我们可以使用索引来访问数组中的元素，索引从0开始。例如：</p>
+        <p><pre><code class = 'language-java'>
+public class ShuZu
+{
+    public static void main(String args[])
+    {
+        //这是注释
+        /* 这也是注释*/
+        int arr[];//声明一个一维数组
+        int []arr1;//同上
+        int arr2[][];//声明二维数组
+        int [][]arr3;//不能指定个数：int arr[5],会报错，是C/C++的写法
+        arr = new int[4];//分配元素
+        int ar[] = new int[5];//声明ar数组并创建数组，二维数组一样
+
+        int a[][] = new int[3][];
+        a[0] = new int[6];
+        a[1] = new int[12];
+        a[2] = new int[8];
+
+        int size = 30;
+        int c[] = new int[size];//C语言不能用（c99之前）
+
+        float boy[] ={21.3f,33.6f,22.4f};//初始化
+
+        float s[] = new float[12];
+        System.out.println(s.length);//输出s数组长度12
+        int s1[][] = new int [3][8];
+        System.out.println(s1.length);//输出3,二维数组来说s1.length是一维数组的数量
+
+    }
+}
+        </code></pre></p>
+        <p><pre><code class = 'language-java'>
+public class ShuZu1
+{
+    public static void main(String agrs[])
+    {
+        int myArray[] = new int[5];
+        myArray[0] = 10;
+        myArray[1] = 20;
+        myArray[2] = 30;
+        myArray[3] = 40;
+        myArray[4] = 50;
+        //myArray[5] = 60;//数组越界
+        int myArray1[] = {10,20,30,40,50};
+        System.out.println(myArray[0]);
+        System.out.println(myArray1[0]);
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们创建了一个长度为5的整数数组，并将一些值赋给它。我们可以使用索引来访问数组中的元素，例如<code>myArray[0]</code>将返回10，<code>myArray[1]</code>将返回20，以此类推。</p>
+        <p>数组的引用：</p>
+        <p><pre><code class = 'language-java'>
+public class ShuZuYingYong
+{
+    public static void main(String args[])
+    {
+        int a[] = {1,2,3,4};
+        int b[] = {100,200,300};
+        System.out.println(a);//a的引用
+        System.out.println(b);//b的引用
+
+        int address = System.identityHashCode(a);//调用静态方法返回不含前缀的a的引用
+        System.out.println(address);
+
+        a = b;//前提：类型相同
+        System.out.println(a);//会发现a，b的引用相同
+        System.out.println(b);
+        int addressA = System.identityHashCode(a);
+        int addressB = System.identityHashCode(a);
+        System.out.println(addressA);//一样相同
+        System.out.println(addressB);
+    }
+}
+        </code></pre></p>
+        <p>前缀是:[I@</p>
+        <p>注释是指用于解释代码的文本，不会被编译器执行。在Java中，注释有三种类型：单行注释（//）、多行注释（/* */）和文档注释（/** */）</p>
+        <p>在这个例子中，我们使用了单行注释来解释代码的功能，以及多行注释来提供更详细的说明。</p>
+        <p>运算符是指用于执行特定操作的符号或关键字。在Java中，常用的运算符包括算术运算符、关系运算符、逻辑运算符等。例如：</p>
+        <p><pre><code class = 'language-java'>
+import java.util.Scanner;
+public class YunSuanFu
+{
+    public static void main(String args[])
+    {
+        Scanner reader = new Scanner(System.in);
+        int a = reader.nextInt();
+        int b = reader.nextInt();
+
+        int sum = a + b;
+        System.out.println(sum);
+        reader.close();
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们使用了加法运算符（+）来计算两个整数的和，并将结果存储在变量sum中。</p>
+        <p>除此之外，还有很多运算符：- * / % -- ++ > < = == >= <= != && ! || << >> >>> & ^ ~ | 除了这些，还有instanceof,左边是对象，右边是类，左边的对象是右边的类或子类创建的时，结果true，否则false</p>
+        <p>优先级：+ -四级，* / %三级</p>` 
+    },
+    {
+        id:"a5",
+        date:"2026年3月11日",
+        category:"Java",
+        title:"选择结构和循环结构（if,for,while,switch等）",
+        language:"java",
+        fullContent:
+        `<p><strong>和C语言中的一样，理解的可以直接下一篇</strong></p>
+        <p>选择结构是指根据条件的不同执行不同的代码块。在Java中，常用的选择结构包括if语句、switch语句等。例如：</p>
+        <p><pre><code class = 'language-java'>
+import java.util.Scanner;
+public class IF
+{
+    public static void main(String args[])
+    {
+        Scanner reader = new Scanner(System.in);
+        int a = reader.nextInt();
+
+        if(a < 0)
+            System.out.println("负数");
+        else if(a == 0)
+            System.out.println("0");
+        else
+            System.out.println("正数");
+
+        reader.close();
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们使用了if语句来判断一个整数是否为正数、负数或零，并输出相应的结果。</p>
+        <p>还有switch的选择结构，一般配合着break来使用。</p>
+        <p><pre><code class = 'language-java'>import java.util.Scanner;
+public class SWITCH
+{
+    public static void main(String args[])
+    {
+        Scanner reader = new Scanner(System.in);
+        int a = reader.nextInt();
+
+        switch(a)
+        {
+            case 1:
+                System.out.println("1");
+                break;
+            case 2:
+                System.out.println("2");
+                break;
+            default:
+                System.out.println("default");
+                break;
+        }
+
+        reader.close();
+    }
+}
+        </code></pre></p>
+        <p>循环结构是指重复执行某段代码块，直到满足特定条件为止。在Java中，常用的循环结构包括for循环、while循环、do-while循环等。例如：</p>
+        <p><pre><code class = 'language-java'>
+public class FOE
+{
+    public static void main(String args[])
+    {
+        int sum = 0;
+
+        for(int i = 0;i <= 10;i++)
+        {
+            sum += i;
+        }
+
+        System.out.println(sum);
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们使用了for循环来计算1到10之间所有整数的和，并将结果存储在变量sum中。for适合知道循环次数，while适合未知次数，do-while和while差不多，但是do-while先使用再判断条件是否符合，while是先判断是否符合条件再使用</p>
+        <p>接下来是break和continue这两个关键字了。</p>
+        <p>break是跳出循环，即下面有语句也不执行，直接跳出，终止循环。continue是跳过这次循环，继续下一次循环，即不会像break那样直接终止循环，而是跳过这一次去执行下一次。</p>
+        <p>看下面这个例子：</p>
+        <p><pre><code class = 'language-java'>
+public class FOR1
+{
+    public static void main(String args[])
+    {
+        for(int i = 0;i <= 10;i++)
+        {
+            if(i == 6)
+                break;
+
+            System.out.printf("%d ",i);//输出0 1 2 3 4 5
+        }
+        System.out.printf("\n");
+
+        for(int j = 0;j <= 10;j++)
+        {
+            if(j == 6)
+                continue;
+
+            System.out.printf("%d ",j);//输出0 1 2 3 4 5 7 8 9 10
+        }
+    }
+}
+        </code></pre></p>`
+    },
+    {
+        id:"a6",
+        date:"2026年3月12日",
+        category:"Java",
+        title:"for语句和数组",
+        language:"java",
+        fullContent:
+        `<p>这部分是关于for语句和数组。JDK5对for语句的功能给予了扩充，使得用户更好的遍历数组。</p>
+        <p>语法格式：<code>for(声明循环变量:数组名){...}</code>,其中，声明循环变量的类型必须要和数组类型相同。这种形式的for语句类似自然语言中的for-each语句。</p>
+        <p>下面给一个例子：</p>
+        <p><pre><code class = 'language-java'>
+public class FOR2
+{
+    public static void main(String args[])
+    {
+        int a[] = {1,2,3,4};
+        char b[] = {'a','b','c','d'};
+
+        for(int i = 0;i < a.length;i++)
+        {
+            System.out.printf("%d ",a[i]);
+        }
+
+        System.out.printf("\n");
+
+        for(int i = 0;i < b.length;i++)
+        {
+            System.out.printf("%c ",b[i]);
+        }
+
+        System.out.printf("\n");
+
+
+        for(int i:a)
+        {
+            System.out.printf("%d ",i);
+        }
+
+        System.out.printf("\n");
+
+        for(char ch:b)
+        {
+            System.out.printf("%c ",ch);
+        }
+    }
+}
+        </code></pre></p>
+        <p><strong>注意：传统方法输出语句是a[i]和b[i]，本篇讲的方法输出语句是循环变量i和ch</strong></p>`
+    },
+    {
+        id:"a7",
+        date:"2026年3月13日",
+        category:"Java",
+        title:"对象和类的理解",
+        language:"java",
+        fullContent:
+        `<p>在Java中，对象是类的实例化。类是一个蓝图或模板，定义了对象的属性和行为。对象则是根据类创建的具体实例，具有独立的状态和行为。</p>
+        <p>类定义了对象的属性（成员变量）和行为（方法）。当我们创建一个对象时，我们就是在使用类来实例化一个具体的实例。每个对象都有自己的属性值，可以通过调用方法来执行特定的操作。</p>
+        <p>例如，我们可以定义一个名为 Dog 的类，其中包含属性bread,size,colour和age，以及方法name(),sleep(),run(),eat()。</p>
+        <p><pre><code class = 'language-java'>
+public class Dog
+{
+    String breed;
+    String colour;
+    int age;
+    int size;
+
+    void eat(){}
+    void run(){}
+    void sleep(){}
+    void name(){}
+}
+        </code></pre></p>
+        <p>这是伪代码片段，仅仅只是为了举例:因为它没有主方法。</p>
+        <p>在主方法里，我们可以创建一个对象myDog,然后我们可以访问变量和方法对它进行使用。但是，在举例之前，我们先学习一下创建对象的语法。</p><p>语法结构是：方法 引用变量 = new 方法();</br>就是下图的:<code>Dog myDog = new Dog();</code></p>
+        <p>例如：</p>
+        <p><pre><code class = 'language-java'>
+public class Dog
+{
+    String breed;
+    int size;
+    String colour;
+    int age;
+
+    void name()
+    {
+        System.out.println("name");
+    }
+
+    void run()
+    {
+        System.out.println("run");
+    }
+
+    void eat()
+    {
+        System.out.println("eat");
+    }
+
+    void sleep()
+    {
+        System.out.println("sleep");
+    }
+
+    public static void main(String args[])
+    {
+        Dog myDog = new Dog();
+        myDog.age = 2;
+        myDog.colour = "yellow";
+        myDog.breed = "Chinese rural dog";
+        myDog.size = 5;
+        System.out.println(myDog.age);
+        System.out.println(myDog.colour);
+        System.out.println(myDog.breed);
+        System.out.println(myDog.size);
+        System.out.println();
+        myDog.eat();
+        myDog.name();
+        myDog.sleep();
+        myDog.run();
+    }
+}
+        </code></pre></p>
+        <p>由代码可见：先创建了一个对象myDog，然后先给myDog赋值，再调用方法。</p>
+        <p>对象是类的实例化，是根据类创建的具体实例，而类则是定义对象属性和行为的蓝图或模板。</p>
+        <p><strong>构造方法：</strong>名称必须与类同名</p>
+        <p><pre><code class = 'language-java'>
+public class Dog1
+{
+    public Dog1(String name)
+    {
+        System.out.println(name);
+    }
+
+    public static void main(String args[])
+    {
+        Dog1 dog1 = new Dog1("Tommy");
+    }
+}
+        </code></pre></p>
+        <p>这段代码会输出主方法中传过去的参数：Tommy。</p>
+        <p><strong>注意：类：class 类名{ 变量的声明 方法的定义 } （不能有括号参数）；构造方法：类名（参数）{ }（可以有参数，比如前面这个例子）</strong></p>
+        <p>下面，展示一下访问实例变量和调用成员方法：</p>
+        <p><pre><code class = 'language-java'>
+public class Dog1
+{
+    private int age;
+    private String name;
+
+    public Dog1(String name)
+    {
+        this.name = name;
+        System.out.println("name:" + name);
+    }
+
+    public void setAge(int age)
+    {
+        this.age = age;
+    }
+
+    public int getAge()
+    {
+        return age;
+    }
+
+    public String getName()
+    {
+        return name;
+    }
+
+    public static void main(String args[])
+    {
+        Dog1 myPuppy= new Dog1("Tommy");
+
+        myPuppy.setAge(2);
+        System.out.println("myPuppy.setage:" + myPuppy.age);
+
+        int age = myPuppy.getAge();
+        System.out.println("age:" + age);
+
+        System.out.println("myPuppy.getAge():" + myPuppy.getAge());
+
+    }
+}
+        </code></pre></p>
+        <p>输出年龄的时候，先调用setAge()方法将年龄作为参数传过去，再用myPuppy.age输出或者在主方法重新定义一个变量age来输出，又或者是用getter方法直接用getAge()输出，都能得到年龄。</p>
+        <p>上面的private,this关键字在后续都会讲到。这里只是提一下，下面简述一下意思：</p>
+        <p>private：private就是私有的，意思是private修饰的变量只能在本类中访问，在别的类中访问会报错。</p>
+        <p>this：this 是一个引用变量，指向当前对象本身。它主要用于解决变量命名冲突和在构造方法中调用其他构造方法。</p>`
+    },
+    {
+        id:"a8",
+        date:"2026年3月14日",
+        category:"Java",
+        title:"方法",
+        language:"java",
+        fullContent:
+        `<p>方法是指在类中定义的一段代码，用于执行特定的任务或操作。方法可以接受参数并返回结果。方法的定义包括方法名、参数列表、返回类型和方法体。例如：</p>
+        <p><pre><code class = 'language-java'>
+public class Method
+{
+    public static int add(int a,int b)
+    {
+        return a + b;
+    }
+
+    public static void main(String args[])
+    {
+        Method ccc = new Method();
+        int result = ccc.add(12,13);
+        System.out.println(result);
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们定义了一个名为add的静态方法，它接受两个整数参数a和b，并返回它们的和。我们在主方法中调用了add方法，并将结果存储在变量result中，最后输出结果。</p>
+        <p>方法是类中的一段代码，用于执行特定的任务或操作，可以接受参数并返回结果，是Java编程中重要的组成部分。</p>
+        <p>方法的分类：</p>
+        <p><table style="width: 100%; border-collapse: collapse; margin: 1rem 0; background: #0a0e16; border-radius: 16px; overflow: hidden;">
+        <thead>
+            <tr style="background: #2a3a4a;">
+                <th style="padding: 12px 16px; text-align: center; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">类型</th>
+                <th style="padding: 12px 16px; text-align: center; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">关键字</th>
+                <th style="padding: 12px 16px; text-align: center; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">特点</th>
+                <th style="padding: 12px 16px; text-align: center; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">调用方式</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom: 1px solid #2a3a4a;">
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db; font-weight: 600;">静态方法</td>
+                <td style="padding: 12px 16px; text-align: center;"><code style="background: #1a2532; padding: 4px 8px; border-radius: 6px; color: #ffbc6e;">static</code></td>
+                <td style="padding: 12px 16px; color: #e6e2db;">属于类，随类加载</td>
+                <td style="padding: 12px 16px; color: #e6e2db;"><code style="background: #1a2532; padding: 2px 6px; border-radius: 4px; color: #e6e7ff;">类名.方法名()</code><br>或直接调用</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #2a3a4a;">
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db; font-weight: 600;">实例方法</td>
+                <td style="padding: 12px 16px; text-align: center;">无 <code style="background: #1a2532; padding: 2px 6px; border-radius: 4px; color: #ffbc6e;">static</code></td>
+                <td style="padding: 12px 16px; color: #e6e2db;">属于对象，需要先创建对象</td>
+                <td style="padding: 12px 16px; color: #e6e2db;"><code style="background: #1a2532; padding: 2px 6px; border-radius: 4px; color: #e6e7ff;">对象.方法名()</code></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #2a3a4a;">
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db; font-weight: 600;">构造方法</td>
+                <td style="padding: 12px 16px; text-align: center;">—</td>
+                <td style="padding: 12px 16px; color: #e6e2db;">无返回值，方法名同类名，用于创建对象时初始化</td>
+                <td style="padding: 12px 16px; color: #e6e2db;"><code style="background: #1a2532; padding: 2px 6px; border-radius: 4px; color: #e6e7ff;">new 类名()</code></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #2a3a4a;">
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db; font-weight: 600;">抽象方法</td>
+                <td style="padding: 12px 16px; text-align: center;"><code style="background: #1a2532; padding: 4px 8px; border-radius: 6px; color: #ffbc6e;">abstract</code></td>
+                <td style="padding: 12px 16px; color: #e6e2db;">没有方法体，子类必须实现</td>
+                <td style="padding: 12px 16px; color: #e6e2db;">不能直接调用</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db; font-weight: 600;">final方法</td>
+                <td style="padding: 12px 16px; text-align: center;"><code style="background: #1a2532; padding: 4px 8px; border-radius: 6px; color: #ffbc6e;">final</code></td>
+                <td style="padding: 12px 16px; color: #e6e2db;">不能被重写</td>
+                <td style="padding: 12px 16px; color: #e6e2db;">正常调用</td>
+            </tr>
+        </tbody>
+        </table></p>
+        <p>构造方法在上一篇已经介绍过，就不介绍了。</p><p>除了方法之外，本篇还要介绍一个内容，那就是可变参数。那么，什么是可变参数呢？</p>
+        <p>可变参数是指在声明方法时不给出参数列表中从某项开始直至最后一项的参数的名字个数，但这些参数的类型必须相同。可变参数使用'...'来表示若干参数。例如：<code>public void f(int ... x,double y)</code></p>
+        <p>可通过下标运算来表示具体参数，如<code>x[0],x[1],x[2]等。</code></p>
+        <p><pre><code class = 'language-java'>
+public class KeBianCanShu
+{
+    int sum;
+    int add(int ... x)
+
+    {
+        for(int i:x)
+        {
+            sum +=i;
+        }
+        return sum;
+    }
+
+    public static void main(String args[])
+    {
+        KeBianCanShu ccc = new KeBianCanShu();
+        System.out.println(ccc.add(203,201,200,200,666,999,777));
+    }
+}
+        </code></pre></p>`
+    },
+    {
+        id :"a9",
+        date:"2026年3月15日",
+        category:"Java",
+        title:"对象的组合",
+        language:"java",        
+        fullContent:
+        `<p>对象的组合是指在一个类中包含另一个类的对象作为成员变量。这种关系被称为“has-a”关系，表示一个对象拥有另一个对象。通过对象的组合，我们可以实现更复杂的对象结构和功能。</p>
+        <p>例如，我们可以定义一个名为Car的类，其中包含一个名为Engine的类作为成员变量：</p>
+        <p><pre><code class = 'language-java'>
+class Engine
+{
+    String type;//定义了一个String类型的type变量
+}
+
+class Car
+{
+    public Engine engine;
+}
+
+public class DuiXiangDeZuHe
+{
+    public static void main(String args[])
+    {
+        Car car = new Car();
+        car.engine = new Engine();
+        car.engine.type = "V8";
+        System.out.println(car.engine.type);
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，Car类包含了一个Engine类的对象作为成员变量，这表示每辆车都有一个引擎。我们可以通过Car类的方法来访问和操作Engine对象，从而实现汽车的功能。</p>
+        <p>总之，对象的组合是一种重要的面向对象设计原则，通过在一个类中包含另一个类的对象，我们可以创建更复杂和功能丰富的对象结构，提高代码的可重用性和维护性。</p>
+        <p>再简单地说就是这样：</p><p><pre><code class = 'language-java'>
+class A 
+{
+}
+class B
+{
+ A a;
+}//B结合了A
+        </code></pre></p>
+        <p>核心就一点： 一个类的成员变量是另一个类的对象，这就是组合。</p>`
+    },
+    {
+        id:"a10",
+        date:"2026年3月16日",
+        category:"Java",
+        title:"实例变量和类变量",
+        language:"java",
+        fullContent:
+        `<p>类体中包括成员变量的声明和方法的定义。成员变量又分为实例变量和类变量两种。实例变量是指在类中声明的变量，但没有使用static修饰符修饰，这些变量属于对象，每个对象都有自己的一份实例变量。当我们创建一个对象时，系统会为该对象分配一块内存来存储它的实例变量。我们可以通过对象来访问和修改它的实例变量。例如：</p>
+        <p><pre><code class = 'language-java'>
+class Person
+{
+    String name;
+}
+
+public class ShiLiBianLiang
+{
+    public static void main(String args[])
+    {
+        Person person = new Person();
+        person.name = "Tom";
+        System.out.println(person.name);
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们定义了一个名为Person的类，其中包含一个实例变量name。当我们创建一个Person对象时，我们可以通过该对象来访问和修改name变量。</p>
+        <p>类变量是指在类中声明的变量，并且使用static修饰符修饰，这些变量属于类本身，而不是某个特定的对象。所有对象共享同一份类变量。当我们修改一个类变量时，所有对象都会受到影响。例如：</p>
+        <p><pre><code class = 'language-java'>
+class Counter
+{
+    static int count;
+}
+
+public class LeiBianLiang
+{
+    public static void main(String args[])
+    {
+        Counter counter1 = new Counter();
+        Counter counter2 = new Counter();
+        counter1.count = 2;
+        counter2.count = 3;
+        System.out.println(counter1.count);//3
+        System.out.println(counter2.count);//3
+        //公用一个count,所以输出都为3
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们定义了一个名为Counter的类，其中包含一个类变量count。当我们创建多个Counter对象时，它们共享同一份count变量，当我们修改count时，所有Counter对象都会受到影响。</p>
+        <p>实例变量属于对象，每个对象都有自己的一份，而类变量属于类本身，所有对象共享同一份。这是Java中成员变量的重要概念，对于理解面向对象编程非常重要。</p>
+        <p>还有实例方法和类方法的区别：类方法不用创建对象</p>
+        <p><pre><code class = 'language-java'>
+import java.lang.reflect.Array;
+import java.util.*;
+public class QueBie
+{
+    public static void main(String args[])
+    {
+        Scanner scanner = new Scanner(System.in);
+        int a[] = {12,34,9,23,45,6,45,90,123,19,34};
+        Arrays.sort(a);
+        System.out.println(Arrays.toString(a));//输出数组
+        System.out.println("输入整数，看看是不是在数组中");
+
+        int num = scanner.nextInt();//不用创建对象
+        int index = Arrays.binarySearch(a,num);//查找元素，参数是(数组名,查找的元素)
+
+        if(index >= 0)
+        {
+            System.out.printf("%d在,下标：%d\n",num,index);
+        }
+
+        else
+        {
+            System.out.println("不在");
+        }
+    }
+}
+        </code></pre></p>
+        <p>除此之外，还用了Arrays的方法:sort()（排序）,toString()（输出数组的全部元素）,binarySearch()（二分查找）</p>
+    `},
+    {
+        id:"a11",
+        date:"2026年3月17日",
+        category:"Java",
+        title:"方法重载",
+        language:"java",
+        fullContent:
+        `<blockquote><p>方法重载是指在同一个类中定义多个方法，这些方法具有相同的名称但参数列表不同。方法重载允许我们使用相同的方法名来处理不同类型或数量的参数，从而提高代码的可读性和灵活性。</p></blockquote>
+        <p>方法重载的规则如下：</p>
+        <p><ul style='padding-left:1em'>
+            <li>方法名必须相同。</li>
+            <li>参数列表必须不同，可以是参数的类型不同、参数的数量不同或两者都不同。</li>
+            <li>方法的返回类型可以相同也可以不同，但仅凭返回类型的不同不能构成方法重载。</li>
+        </ul></p>
+        <p>例如：</p>
+        <p><pre><code class = 'language-java'>
+public class MethodRechange
+{
+    public int add(int a,int b)
+    {
+        return a+b;
+    }
+
+    public int add(int a,int b,int c)
+    {
+        return a+b+c;
+    }
+
+    public double add(double a,double b)
+    {
+        return a+b;
+    }
+
+    public static void main(String args[])
+    {
+        MethodRechange sum = new MethodRechange();
+        System.out.println(sum.add(1,46));
+        System.out.println(sum.add(3.14,5.26));
+        System.out.println(sum.add(2,65,13));
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们定义了三个名为add的方法，它们具有不同的参数列表。第一个add方法接受两个整数参数并返回它们的和，第二个add方法接受三个整数参数并返回它们的和，第三个add方法接受两个double类型的参数并返回它们的和。当我们调用add方法时，Java编译器会根据传递的参数类型和数量来确定调用哪个版本的方法。</p>
+        <p>方法重载是Java中一种重要的特性，它允许我们在同一个类中定义多个具有相同名称但参数列表不同的方法，从而提高代码的可读性和灵活性。</p>
+    `},
+    {
+        id:"a12",
+        date:"2026年3月18日",
+        category:"Java",
+        title:"import语句",
+        language:"java",
+        fullContent:
+        `<p>import语句用于在Java程序中引入其他类或包，以便在当前类中使用它们的功能。通过import语句，我们可以避免在代码中使用类的全限定名，从而使代码更简洁和易读。import语句通常放在Java源文件的开头，在package声明之后，类定义之前。</p>
+        <p>Java提供了两种类型的import语句：</p>
+        <p><ul style='padding-left:1em'>
+            <li>单个类导入：使用import语句导入特定的类。例如：<code>import java.util.ArrayList;</code> 这将导入java.util包中的ArrayList类，使我们可以直接使用ArrayList而无需指定完整路径。</li>
+            <li>通配符导入：使用星号（*）作为通配符来导入一个包中的所有类。例如：<code>import java.util.*;</code> 这将导入java.util包中的所有类，使我们可以直接使用该包中的任何类。</li>
+        </ul></p>
+        <p>需要注意的是，import语句仅仅是为了方便我们在代码中引用其他类，并不会增加程序的性能开销。Java编译器会根据需要自动处理导入的类，无论是单个类还是整个包。</p>
+        <p>总之，import语句是Java中用于引入其他类或包的重要工具，它使得我们的代码更加简洁和易读，同时也提供了灵活性来选择性地导入所需的类。</p>
+        <p>举例：</p>
+        <p><pre><code class = 'language-java'>
+import java.util.*;
+public class test
+{
+    public static void main(String args[])
+    {
+        Scanner scanner = new Scanner(System.in);
+        int age = scanner.nextInt();
+        System.out.println("age:" + age);
+        scanner.close();
+    }
+}
+        </code></pre></p>
+        <p>上面代码展示了import语句的使用方法。最开始先用import java.util.*;导入所有包，然后Scanner scanner = new Scanner();创建一个Scanner对象,再定义age变量，用来接收scanner调用nextInt()方法的值，即键盘输入的值。最后scanner调用close()方法关闭输入。（可关可不关，但是最好还是关闭吧）</p>
+        <p><ul style='padding-left:1em'>
+            <li>整型：nextInt()，nextLong()，nextShort()</li>
+            <li>浮点型：nextDouble(),nextFloat()</li>
+            <li>一个字符串：next()</li>
+            <li>整行字符串：nextLine()</li>
+            <li>charAt(索引)：表示取字符串的第1个字符（索引从0开始）</li>
+            <li>混用：next().charAt(索引)和nextLine().charAt(索引)</li>
+            <li>字节型：nextByte()</li>
+            <li>布尔型：nextBoolean()</li>
+        </ul></p>
+        <p>nextLine() 会读取换行符，如果前面用了 nextInt() 或 next()，会导致 nextLine() 直接读到空字符串</p>
+    `},
+    {
+        id:"a13",
+        date:"2026年3月19日",
+        category:"Java",
+        title:"Java中的包（Package语句）",
+        language:"java",
+        fullContent:
+        `<p>包（Package）是Java中用于组织类和接口的一种机制。它提供了一种命名空间，帮助开发者更好地管理和组织代码。通过使用包，我们可以避免类名冲突，并且可以更方便地进行访问控制和代码维护。</p>
+        <p>在Java中，包的定义使用package关键字，通常放在Java源文件的开头。例如：<code>package com.example.myapp;</code> 这将定义一个名为com.example.myapp的包。我们可以在这个包中创建多个类和接口，这些类和接口就属于这个包的一部分。</p>
+        <p>使用包的好处包括：</p>
+        <p><ul style='padding-left:1em'>
+            <li>避免命名冲突：不同的开发者或团队可能会创建具有相同名称的类，通过使用包可以将它们区分开来，避免命名冲突。</li>
+            <li>访问控制：包还提供了访问控制机制，可以通过访问修饰符（如public、protected、private）来控制类和成员的可见性。</li>
+            <li>代码组织：包有助于将相关的类和接口组织在一起，使得代码结构更加清晰和易于维护。</li>
+        </ul></p>
+        <p>总之，包是Java中用于组织类和接口的重要机制，它提供了命名空间、访问控制和代码组织等功能，是Java编程中不可或缺的一部分。</p>
+        <p><strong>其实，在文件层面就是新建了一个文件夹，然后把类文件放在里面。</strong></p>`
+    },
+    {
+        id:"a14",
+        date:"2026年3月20日",
+        category:"Java",
+        title:"Java中的访问修饰符",
+        language:"java",
+        fullContent:
+        `<p>访问修饰符是Java中用于控制类、方法和变量访问权限的关键字。Java提供了四种访问修饰符：public、protected、private和默认（不使用修饰符）。通过使用访问修饰符，我们可以控制哪些类或成员可以被其他类访问，从而实现封装和信息隐藏。</p>
+        <p>以下是四种访问修饰符的详细说明：</p>
+        <p><ul style='padding-left:1em'>
+            <li><strong>public</strong>: 使用public修饰的类、方法或变量可以被任何其他类访问，无论它们是否在同一个包中。这是最开放的访问级别。</li>
+            <li><strong>protected</strong>: 使用protected修饰的成员可以被同一个包中的其他类访问，以及任何子类（即使子类在不同的包中）。这提供了一定程度的封装，同时允许继承关系中的访问。</li>
+            <li><strong>private</strong>: 使用private修饰的成员只能在定义它们的类内部访问，其他类无法直接访问。这是最严格的访问级别，常用于隐藏实现细节。</li>
+            <li><strong>默认（包私有）</strong>: 如果没有指定访问修饰符，则默认为包私有。这意味着该成员只能被同一个包中的其他类访问，但不能被不同包中的类访问。</li>
+        </ul></p>
+        <p>访问修饰符是Java中用于控制类、方法和变量访问权限的重要工具，通过合理使用它们，我们可以实现良好的封装和信息隐藏，提高代码的安全性和可维护性。</p>
+        <p>下面展示一张极简表：</p>
+        <p><table style="width: 100%; border-collapse: collapse; margin: 1rem 0; background: #0a0e16; border-radius: 16px; overflow: hidden;">
+        <thead>
+            <tr style="background: #2a3a4a;">
+                <th style="padding: 12px 16px; text-align: center; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">修饰符</th>
+                <th style="padding: 12px 16px; text-align: center; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">同类</th>
+                <th style="padding: 12px 16px; text-align: center; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">同包</th>
+                <th style="padding: 12px 16px; text-align: center; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">子类（不同包）</th>
+                <th style="padding: 12px 16px; text-align: center; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">任意类</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom: 1px solid #2a3a4a;">
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db; font-weight: 600;">private</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">✅</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">❌</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">❌</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">❌</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #2a3a4a;">
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db; font-weight: 600;">默认</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">✅</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">✅</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">❌</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">❌</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #2a3a4a;">
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db; font-weight: 600;">protected</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">✅</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">✅</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">✅</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">❌</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db; font-weight: 600;">public</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">✅</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">✅</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">✅</td>
+                <td style="padding: 12px 16px; text-align: center; color: #e6e2db;">✅</td>
+            </tr>
+        </tbody>
+        </table></p>
+        <p><ul style='padding-left:1em'>
+            <li><strong>public：完全公开，谁都能进的门</strong></li>
+            <li><strong>protected：家族+同楼邻居可进，外楼子女也能进</strong></li>
+            <li><strong>private：自己的卧室，只有自己能进</strong></li>
+            <li><strong>默认（无修饰符）：仅同楼邻居可进</strong></li>
+        </ul></p>`
+    },
+    {
+        id:"a15", 
+        date:"2026年3月21日",
+        category:"Java",
+        title:"Java中的this关键字",
+        language:"java",
+        fullContent:
+        `<p>this关键字是Java中一个重要的引用变量，它指向当前对象本身。this关键字主要用于解决变量命名冲突和在构造方法中调用其他构造方法。</p>
+        <p>当一个类中有成员变量和局部变量同名时，可以使用this关键字来区分它们。例如：</p>
+        <p><pre><code class = 'language-java'>
+import java.util.*;
+public class test_this
+{
+    private String name;
+    private int age;
+
+    public test_this(String name,int age)
+    {
+        this.age = age;
+        this.name = name;
+    }
+
+    public void show()
+    {
+        System.out.println(name + "," + age);
+    }
+
+    public static void main(String args[])
+    {
+        test_this s1 = new test_this("zhangsan",28);
+        test_this s2 = new test_this("wangwu",20);
+        
+        s1.show();
+        s2.show();
+
+        Scanner scanner = new Scanner(System.in);
+        String name = scanner.next();
+        int age = scanner.nextInt();
+        System.out.println(name + "," + age);
+        
+        scanner.close();
+    }
+}
+        </code></pre>
+        <pre><code class = 'language-java'>
+public class This1
+{
+    private String name;
+    private int age;
+
+    // 构造方法
+    public This1(String name, int age) 
+    {
+        this.age = age;// 第1空
+         this.name = name;// 第2空
+    }
+
+    public void setName(String name) 
+    {
+          this.name = name;// 第3空
+    }
+
+    public void introduce() 
+    {
+        String name = "临时变量";
+        System.out.println("我叫" + this.name + "，今年" + this.age + "岁");  // 第4、5空
+        // 上面的输出要显示成员变量的值，不能显示局部变量
+    }
+}
+        </code></pre></p>
+        <p>如图所示，当局部变量和成员变量同名时，使用this关键字可以明确指定访问的是成员变量。</p>
+        <p>此外，this关键字还可以用于在构造方法中调用其他构造方法。例如：</p>
+        <p><pre><code class = 'language-java'>
+public class This2
+{
+    private String name;
+    private int age;
+    private String school;
+
+    //构造方法1，三个参数
+    public This2(String name,int age,String school)
+    {
+        this.name = name;
+        this.age = age;
+        this.school = school;
+    }
+
+    //构造方法2，两个参数，一个未知
+    public This2(String name,int age)
+    {
+        this(name,age,"未知");
+    }
+
+    //构造方法3，一个参数，两个未知
+    public This2(String name)
+    {
+        this(name,0);
+    }
+
+    public static void main(String args[])
+    {
+        This2 s1 = new This2("zhangsan",13,"11555");
+        This2 s2 = new This2("wangwu",13);
+        This2 s3 = new This2("lisi");
+
+        System.out.println(s1.name + " " +s1.school + " " + s1.age);
+        System.out.println(s2.name + " " +s2.school + " " + s2.age);
+        System.out.println(s3.name + " " +s3.school + " " + s3.age);
+    }
+}
+        </code></pre></p>
+        <p>由代码：通过使用this()调用其他构造方法，可以避免代码重复。</p>
+        <p><strong>注意：this只能在实例方法或构造方法中使用，并且只能在第一行，所以使用时要考虑super()等其他需要在第一行使用的关键字；还不能出现循环调用的情况(A调用B，B调用A)。</strong></p>
+        <p><table style="width: 100%; border-collapse: collapse; margin: 1rem 0; background: #0a0e16; border-radius: 16px; overflow: hidden;">
+        <thead>
+            <tr style="background: #2a3a4a;">
+                <th style="padding: 12px 16px; text-align: left; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">用途</th>
+                <th style="padding: 12px 16px; text-align: left; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">语法</th>
+                <th style="padding: 12px 16px; text-align: left; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">位置</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom: 1px solid #2a3a4a;">
+                <td style="padding: 12px 16px; color: #e6e2db;">区分成员变量和参数</td>
+                <td style="padding: 12px 16px;"><code style="background: #1a2532; padding: 4px 8px; border-radius: 6px; color: #e6e7ff;">this.name = name</code></td>
+                <td style="padding: 12px 16px; color: #e6e2db;">任意</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px 16px; color: #e6e2db;">调用其他构造方法</td>
+                <td style="padding: 12px 16px;"><code style="background: #1a2532; padding: 4px 8px; border-radius: 6px; color: #e6e7ff;">this(参数列表)</code></td>
+                <td style="padding: 12px 16px; color: #e6e2db;">必须在第一行</td>
+            </tr>
+        </tbody>
+        </table></p>
+    `},
+    {
+        id:"a16",
+        date:"2026年3月22日",
+        category:"Java",
+        title:"Java中基本类型的类封装（包装类）",
+        language:"java",        
+        fullContent:
+        `<p>Java中的基本类型（如int、double、boolean等）是原始数据类型，它们不是对象，因此没有方法可以调用。为了在需要对象的情况下使用基本类型，Java提供了包装类（Wrapper Classes），每个基本类型都有一个对应的包装类。例如：Integer对应int，Double对应double，Boolean对应boolean等。</p>
+        <p>包装类提供了一些有用的方法来操作基本类型的值，例如：</p>
+        <p><pre><code class = 'language-java'>
+public class WrapperSimpleExample
+{
+    public static void main(String args[])
+    {
+        String str = "123";
+        int num = Integer.parseInt(str);
+        System.out.println("字符转数字：" + num);
+
+        int num1 = 123456;
+        String str1 = Integer.toString(num1);
+        System.out.println("数字转字符：" + str1);
+
+        Integer a = 10;
+        Integer b = 20;
+        int result = a.compareTo(b);
+        System.out.println("a,b的大小：" + result);
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们使用了Integer类的静态方法parseInt()将字符串转换为整数，并使用toString()方法将整数转换为字符串。此外，包装类还提供了其他方法，如valueOf()、compareTo()等，可以方便地进行类型转换和比较操作。</p>
+        <p>总之，包装类是Java中用于封装基本类型的对象，它们提供了丰富的方法来操作基本类型的值，使得我们在需要对象的情况下能够方便地使用基本类型。</p>`
+    },
+    {
+        id:"a17",
+        date:"2026年3月23日",
+        category:"Java",
+        title:"Java中的var关键字和类型推断",
+        language:"java",    
+        fullContent:
+        `<p>var关键字是Java 10引入的一种局部变量类型推断机制，它允许开发者在声明局部变量时省略类型，编译器会根据变量的初始化表达式自动推断出变量的类型。使用var关键字可以使代码更简洁和易读，尤其是在声明复杂类型的变量时。</p>
+        <p>使用var关键字的语法如下：</p>
+        <p><code>var variableName = initializationExpression;</code></p>
+        <p>例如：</p>
+        <p><pre><code class = 'language-java'>
+public class Var
+{
+    public static void main(String args[])
+    {
+        var message = "Hello,World!";
+        System.out.println(message);
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们使用var关键字声明了一个字符串变量message，并将其初始化为'Hello, World!'。编译器会自动推断出message的类型为String。</p>
+        <p>需要注意的是，var关键字只能用于局部变量的声明，不能用于成员变量、方法参数或返回类型。此外，使用var时必须同时进行初始化，因为编译器需要通过初始化表达式来推断变量的类型。</p>
+        <p>总之，var关键字是Java中一种方便的局部变量类型推断机制，它可以使代码更简洁和易读，但需要注意其使用范围和初始化要求。</p>`
+    },
+    {
+	id:"a18",
+	date:"2026年3月24日",
+	category:"Java",
+	title:"Java中的子类与父类（继承）",
+	language:"java",
+	fullContent:
+		`<p>子类与父类（继承）是面向对象编程中的一个重要概念。通过继承，子类可以获取父类的属性和方法，从而实现代码的重用和扩展。</p>
+		<p>在Java中，使用extends关键字来实现继承。例如：</p>
+		<p><pre><code class = 'language-java'>
+class Animal
+{
+    private int num;
+    public String name;
+
+    protected void speak()
+    {
+        System.out.println("Hello");
+    }
+}
+
+class Dogs extends Animal
+{
+    protected void speak()//重写父类中的speak方法
+    {
+        System.out.println("Hi");
+    }
+}
+
+public class ZiLeiYuFuLei
+{
+    public static void main(String args[])
+    {
+        Animal dogs = new Dogs();//父类 对象名 = new 子类，反过来报错
+        dogs.name = "dog";
+        dogs.speak();
+    }
+}
+		</code></pre></p>
+		<p>在这个例子中，我们定义了一个名为Animal的父类，其中包含一个名为name的属性和一个名为speak()的方法。然后我们定义了一个名为Dog的子类，它继承了Animal类，并重写了一个名为speak()的新方法。</p>
+		<p>需要注意的是，子类可以访问父类的所有public和protected成员，但不能访问父类的private成员。此外，子类还可以重写父类的方法，以提供特定于子类的实现。</p>
+		<p>继承是Java中一种重要的特性，它允许我们在已有的基础上创建新的类，从而实现代码的重用和扩展。</p>
+		<p>instanceof运算符在这里会有所变动。它左边是对象，右边是类名，但是这个对象必须是右边的类或子类创建的对象时，返回true，否则返回false。</p>
+		<p>成员变量的隐藏：变量是在子类中重新声明的，会隐藏父类中的同名变量。使用变量会由类型决定。</p>`
+	},
+    {
+		id:"a19",
+		date:"2026年3月25日",
+		category:"Java",
+		title:"Java中的super关键字",
+		language:"java",
+        fullContent:
+		`<p>super关键字是Java中用于访问父类成员的一种机制。它主要用于在子类中调用父类的构造方法、属性和方法。</p>
+		<p>在Java中，使用super关键字可以实现对父类成员的访问。例如：</p>
+		<p><pre><code class = 'language-java'>
+class Animal1
+{
+    String name;
+
+     void speek()
+    {
+        System.out.println("hehe");
+    }
+}
+
+class Dogs1 extends Animal1
+{
+    void speek()
+    {
+        super.speek();//调用父类的speek方法输出hehe
+        System.out.println("haha");//输出haha
+    }
+
+}
+
+public class Super
+{
+    public static void main(String args[])
+    {
+        Animal1 animal1 = new Dogs1();
+        animal1.speek();//调用speek方法(Dogs1()的对象所以是子类)
+    }
+}
+		</code></pre></p>
+		<p>在这个例子中，我们定义了一个名为Animal的父类，其中包含一个名为name的属性和一个名为speak()的方法。然后我们定义了一个名为Dog的子类，它继承了Animal类，并重写了一个名为speak()的新方法。在Dog类中，我们使用super关键字调用了父类的speak()方法。</p>
+		<p>需要注意的是，super关键字只能在子类中使用，并且只能在第一行使用，所以使用时要考虑this()等其他需要在第一行使用的关键字；还不能出现循环调用的情况(A调用B，B调用A)。</p>`
+	},
+    {
+		id:"a20",
+		date:"2026年3月26日",
+		category:"Java",
+		title:"Java中的final关键字",
+		language:"java",       
+        fullContent:
+		`<p>final关键字是Java中用于修饰类、方法和变量的一种机制，它表示被修饰的元素不能被修改或继承。使用final关键字可以提高代码的安全性和稳定性，防止意外的修改和继承。</p>
+		<p>以下是final关键字的详细说明：</p>
+		<p><ul style='padding-left:1em'>
+			<li><strong>final类</strong>: 使用final修饰的类不能被继承。这意味着其他类无法扩展这个类，也无法创建它的子类。例如：<code>public final class MyClass { ... }</code></li>
+			<li><strong>final方法</strong>: 使用final修饰的方法不能被重写。这意味着子类无法提供这个方法的新实现。例如：<code>public final void myMethod() { ... }</code></li>
+			<li><strong>final变量</strong>: 使用final修饰的变量是常量，一旦被赋值后就不能再修改。这适用于基本类型和引用类型。例如：<code>public final int MY_CONSTANT = 10;</code></li>
+		</ul></p>
+		<p>例如：</p>
+		<p><pre><code class = 'language-java'>
+public class Final
+{
+    public static final String COMPANY = "Java.Inc";//static final静态常量
+    private final int id;//实例常量
+    private final String name;//实例常量
+
+    public Final(int id,String name)//final方法
+    {
+        this.id = id;
+        this.name = name;
+    }
+
+    public final void display()//普通方法
+    {
+        System.out.println("ID: " + id + ", Name: " + name);
+    }
+
+    public void show()
+    {
+        final int localNum = 99;//局部常量
+        System.out.println(localNum);
+    }
+
+    public static void main(String args[])
+    {
+        Final ccc = new Final(1,"zhangsan");
+        ccc.display();
+        ccc.show();
+
+        System.out.println(COMPANY);//可以省略类名，因为在同一个类
+        System.out.println(Final.COMPANY);//不同类中必须要带上类名
+    }
+}
+		</code></pre></p>
+		<p>final关键字是Java中用于修饰类、方法和变量的重要工具，通过使用它们，我们可以提高代码的安全性和稳定性，防止意外的修改和继承。</p>`
+	},
+    {
+		id:"a21",
+		date:"2026年3月27日",
+		category:"Java",
+		title:"Java中的上转型和下转型",
+		language:"java",
+        fullContent:
+		`<p>上转型和下转型是Java中关于继承和多态的重要概念。上转型是指将子类对象赋值给父类引用，而下转型是指将父类引用强制转换为子类类型。</p>
+		<p>上转型示例：</p>
+		<p><pre><code class = 'language-java'>
+class Animal2
+{
+    String name = "Animal";
+
+    public void Eat()
+    {
+        System.out.println("These animals are eating food");
+    }
+}
+
+class Dog2 extends Animal2
+{
+    String name = "Dog";
+    String breed = "Golden Retriever";
+
+    public void Eat()
+    {
+        System.out.println("The dog is eating bones");
+    }
+
+    public void bark()
+    {
+        System.out.println("Wolf");
+    }
+}
+
+public class ShangZhuanXing
+{
+    public static void main(String args[])
+    {
+        Animal2 animal2 = new Dog2();
+        animal2.Eat();//使用子类重写的方法
+        System.out.println(animal2.name);//父类的属性
+    }
+}
+		</code></pre></p>
+		<p>在这个例子中，我们创建了一个Dog对象，并将其赋值给Animal类型的引用。这就是上转型，它允许我们使用父类的引用操作子类对象。</p>
+		<p>下转型示例：</p>
+		<p><pre><code class = 'language-java'>
+class Animal3
+{
+    public void eat()
+    {
+        System.out.println("eat");
+    }
+}
+
+class Dog3 extends Animal3
+{
+    public void eat()
+    {
+        System.out.println("Dog eat");
+    }
+
+    public void bark()
+    {
+        System.out.println("bark");
+    }
+}
+
+public class XiaZhuanXing
+{
+    public static void main(String args[])
+    {
+        Animal3 animal3 = new Dog3();
+        animal3.eat();//上转型
+
+        Dog3 dog3 = (Dog3)animal3;//下转型
+        dog3.bark();//子类特有的方法
+    }
+}
+		</code></pre></p>
+		<p>在这个例子中，我们首先将Dog对象赋值给Animal类型的引用，然后又将其强制转换为Dog类型。这就是下转型，它允许我们访问子类特有的方法和属性。</p>
+		<p>需要注意的是，下转型必须是安全的，即父类引用实际上指向的是子类对象。否则会抛出ClassCastException异常。</p>
+		<p>总的来说:</p>
+		<p>上转型是父类的对象能调用子类的重写的方法，访问的属性由父类决定，子类特有的属性和方法不能使用。就是能用父类的属性和子类中对父类重写的方法。访问的属性由父类决定，子类特有的属性和方法不能使用。</p>
+		<p>下转型是对父类定义的对象的强制类型转换成子类，再赋给子类创建的对象，就是下转型图中的<code>Dog3 dog3 = (Dog3)animal3</code>，可以调用子类所有的方法，属性，包括特有的方法，属性。<u>注意：默认访问的是子类的属性，如果要访问父类的属性，需要使用super关键字。</u></p>`
+	},
+    {
+		id:"a22",
+		date:"2026年3月28日",
+		category:"Java",
+		title:"Java中的继承与多态",
+		language:"java",
+        fullContent:
+		`<p>继承与多态是Java中面对对象编程的核心概念。通过前面的学习，多态与继承的概念已经变得非常清晰了。所以，这里就不过多讲解。直接看代码：</p>
+		<p><pre><code class = 'language-java'>
+class Animal4
+{
+    	void cry()
+	{
+        	System.out.println("父类");
+    	}
+}
+
+class Cat extends Animal4
+{
+    	void cry()
+	{
+        	System.out.println("Cat");
+    	}
+}
+
+class Cow extends Animal4
+{
+    	void cry()
+	{
+        	System.out.println("Cow");
+    	}
+}
+
+public class JiChengYuDuoTai
+{
+    	public static void main(String args[])
+	{
+        	Animal4 animal4;
+        	animal4 = new Cat();
+        	animal4.cry();
+        	animal4 = new Cow();
+        	animal4.cry();
+    	}
+}
+		</code></pre></p>
+		<p>这就是多态，父类对象可以使用子类的重写的方法和父类中的方法，属性，子类特有的方法和属性不能使用。</p>`
+	},
+    {
+		id:"a23",
+		date:"2026年3月29日",
+		category:"Java",
+		title:"Java中abstract类和abstract方法",
+		language:"java", 
+        fullContent:
+		`<p>abstract类和abstract方法是Java中用于定义抽象类和抽象方法的关键字。抽象类是不能被实例化的类，它通常包含一个或多个抽象方法。抽象方法是没有实现的方法,<u>它必须在子类中被重写。</u></p>
+		<p>使用abstract关键字的语法如下：</p>
+		<p><code>public abstract class MyClass { ... }</code></p>
+		<p><code>public abstract void myMethod();</code></p>
+		<p>例如：</p>
+		<p><pre><code class = 'language-java'>
+abstract class Animal 
+{
+    abstract void cry();
+}
+
+class Cat extends Animal 
+{
+    void cry() 
+    {
+        System.out.println("喵"); 
+    }
+}
+
+		</code></pre></p>
+		<p>在这个例子中，我们定义了一个名为MyClass的抽象类，并包含了一个名为myMethod的抽象方法。子类必须重写这个抽象方法才能被实例化。</p>
+		<p>abstract类和abstract方法是Java中用于定义抽象概念的重要工具，它们使得我们可以定义一些通用的行为规范，并在具体的子类中提供实现。</p>` 
+	},
+    {
+        id:"a24",
+        date:"2026年3月30日",
+        category:"Java",
+        title:"Java中的接口（interface）",
+        language:"java",
+        fullContent:
+        `<p>接口（interface）是Java中用于定义一组抽象方法,接口的关键字是interface。接口的定义和类的定义很相似，分为接口声明和接口体。</p>
+        <p>接口声明：<code>interface Com{...}</code>,就是interface 接口名字</p>
+        <p>接口体：<code>public static final int CONSTANT = 10;</code></p>
+        <p>接口中的方法默认是public abstract的，属性默认是public static final的。</p>
+        <p><pre><code class = 'language-java'>
+interface Com
+{
+    public static final int MAX = 100;
+    //等价 int MAX = 100,默认属性是public static final的
+    public abstract void add();
+    //等价 void add(),默认方法是public abstract,有参数也是一样的
+    public abstract float sum(float x,float y);
+    //等价于 float sum(float x,float y)
+}
+        </code></pre></p>
+        <p><s>这是伪代码，完整的代码举例在下一篇哦~</s></p>
+        <p>接口的default实例方法:</p>
+        <p><pre><code class = 'language-java'>
+interface ComDefault
+{
+    public final int Max = 100;
+    public abstract void add();
+    public abstract float sum(float x,float y);
+
+    public default int max(int a,int b)
+    {
+        return a > b?a : b;//三元操作符，意思是：判断a是否大于b,如果大于返回,否则返回b
+    }
+}
+        </code></pre></p>
+        <p>这里面的default关键字不能省略，因为不允许定义通常的带方法体的public实例方法。default实例方法访问权限必须是public（允许省略public修饰符）</p>
+        <p>接口体中的static方法：</p>
+        <p><pre><code class = 'language-java'>
+interface ComStatic
+{
+    public final int Max = 100;
+    public abstract void add();
+    public abstract float sum(float x,float y);
+
+    public default int max(int a,int b)
+    {
+        return a > b?a : b;
+    }
+    //从JDK 8 开始，允许在接口体中定义static方法。
+    public static void f()
+    {
+        System.out.println("CCC");
+    }
+}
+        </code></pre></p><p>可以直接在接口体中定义static方法。</p><p>还有private方法。</p><p>从JDK 9开始，允许在接口中定义peivate方法，目的是配合接口体中的default方法。即接口可以将某些算法封装在private的方法中，供接口中的default方法调用，实现算法的复用。</p>`
+    },
+    {
+        id:"a25",
+        date:"2026年3月31日",
+        category:"Java",
+        title:"Java中的实现接口",
+        language:"java",
+        fullContent:
+        `<p>实现接口是指一个类通过使用implements关键字来实现一个或多个接口，从而提供接口中定义的抽象方法的具体实现。通过实现接口，类可以获得接口所定义的行为规范，并且可以被视为接口类型的对象。</p>
+        <p>使用implements关键字的语法如下：</p><p><code>public class MyClass implements MyInterface { ... }</code></p>
+        <p><code>class A implements Com,Addable</code></p>
+        <p><code>class Dog extends Animal implements Eatable,Sleepable</code></p>
+        <p>例如：</p>
+        <p>实现接口允许我们定义类与接口之间的关系，类可以获得接口所定义的行为规范，并且可以被视为接口类型的对象。</p>
+        <p><pre><code class = 'language-java'>
+package Interface;
+
+public interface Com
+{
+    public static final int Max = 100;
+    public abstract void add();
+    public abstract float sum(float x,float y);
+
+    default int max(int a,int b)
+    {
+        outPut();
+        return a > b?a : b;
+    }
+
+    public static void f()
+    {
+        System.out.println("f");
+    }
+    private void outPut()
+    {
+        System.out.println("output");
+    }
+}
+            </code></pre></p>
+            <p><pre><code class = 'language-java'>
+package Interface;
+
+public class AAA implements Com
+{
+    public void on()
+    {
+        System.out.println("on");
+    }
+
+    public float sum(float x,float y)
+    {
+        return x + y;
+    }
+
+    public void add()//尽管不用，但是这是抽象类，所以必须要由实现类实现
+    {
+        System.out.println("add");
+    }
+}
+        </code></pre></p>
+        <p><pre><code class = 'language-java'>
+package Interface;
+
+public class Test
+{
+    public static void main(String args[])
+    {
+        AAA a = new AAA();
+        System.out.println(AAA.Max);
+        System.out.println("调用on（重写）");
+        a.on();
+        System.out.println("调用sum（重写）" + a.sum(12,18));
+        System.out.println("调用接口提供的default方法" + a.max(12,78));
+        Com.f();
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们定义了一个名为Com的接口，其中包含了一个常量Max、两个抽象方法add()和sum()，以及一个default方法max()和一个static方法f()。然后我们定义了一个名为AAA的类，它实现了Com接口，并提供了add()和sum()方法的具体实现。在Test类中，我们创建了AAA对象，并调用了接口中的常量、重写的方法、default方法和static方法。</p>
+        <p>接口的细节说明</p>
+        <p>在定义接口时，如果关键字interface前面加上了public修饰符，那么该接口中的所有方法和常量都默认具有public访问权限，称这样的接口为public接口。public接口可以被任何一个类实现。</p>
+        <p>如果一个接口不加public修饰，就称作友好接口，友好接口可以被与该接口在同一包中的类实现。</p>
+    `},
+    {
+        id:"a26",
+        date:"2026年4月1日",
+        category:"Java",
+        title:"Java中的接口回调",
+        language:"java",
+        fullContent:
+        `<p>接口回调是Java中一种重要的编程模式，它允许一个类通过实现接口来定义一组方法，然后将这些方法的实现交给另一个类来完成。这种模式在事件处理、观察者模式等场景中非常有用。</p>
+        <p>接口属于引用型变量，在接口变量中可以存放实现该接口的类的实例的引用，即存放对象的引用。</p>
+        <p>例如：假设Com是一个接口，那么就可以用Com声明一个变量：</p>
+        <p><code> Com com;</code></p>
+        <p>声明了接口型变量Com，Com是一个接口，com是null，它只是一个“引用变量”，可以指向任何实现了Com接口的对象。</p>
+        <p><code>ImpleCom object = new ImpleCom();</code></p>
+        <p>创建了一个ImpleCom类的实例对象,ImpleCom是实现了Com接口的类,object是这个对象的引用。</p>
+        <p><code>com = object;</code></p>
+        <p>关键一步：把object赋值给com,因为ImpleCom实现了Com接口，所以ImpleCom的对象可以赋值给Com类型的变量,这就是向上转型（upcasting）：把子类/实现类的引用赋给父类/接口类型的变量。</p>
+        <p>举个例子：</p>
+        <p><pre><code class = 'language-java'>
+package Interface;
+
+interface ShowMessage
+{
+    void DisplayTrademark(String s);
+    default void outPutStart()
+    {
+        System.out.println("********");
+    }
+}
+
+class TV implements ShowMessage
+{
+    public void DisplayTrademark(String s)
+    {
+        System.out.println("tvtvtvtv");
+        System.out.println(s);
+        System.out.println("tvtvtvtv");
+    }
+}
+
+class PC implements ShowMessage
+{
+    public void DisplayTrademark(String s)
+    {
+        System.out.println("pcpcpcpc");
+        System.out.println(s);
+        System.out.println("pcpcpcpc");
+    }
+}
+
+public class InterfaceBack
+{
+    public static void main(String args[])
+    {
+        ShowMessage sm;
+        sm = new TV();
+        sm.DisplayTrademark("长城牌电视机");
+        sm = new PC();
+        sm.outPutStart();
+        sm.DisplayTrademark("华为电脑");
+        sm.outPutStart();
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们定义了一个名为ShowMessage的接口，其中包含了一个抽象方法DisplayTrademark()和一个default方法outPutStart()。然后我们定义了两个类TV和PC，它们都实现了ShowMessage接口，并提供了DisplayTrademark()方法的具体实现。在InterfaceBack类中，我们创建了一个ShowMessage类型的变量sm，并将其赋值为TV和PC的实例对象，分别调用了DisplayTrademark()方法和outPutStart()方法。</p>
+        <p>接口回调是一种非常有用的编程模式，它允许我们在不同的类之间进行通信和协作，从而实现更灵活和可扩展的代码设计。</p>
+    `},
+    {
+        id:"a27",
+        date:"2026年4月2日",
+        category:"Java",
+        title:"Java中的函数接口和Lambda表达式",
+        language:"java",
+        fullContent:
+        `<p>函数接口：如果一个接口中有且只有一个abstract方法，那么这个接口是单接口。从JDK 8 开始，Java使用Lambda表达式，并将但接口称为函数接口。</p>
+        <p>Lambda表达式是一种简洁的语法，用于创建匿名内部类的实例。它简化了函数接口的使用，使得代码更加简洁和易读。</p>
+        <p>下面是举例：</p>
+        <p>这是普通函数：</p>
+        <p><pre><code class = 'language-java'>
+public class BiaoDaShi
+{
+    int computerSum(int a,int b)
+    {
+        return a + b;
+    }
+}
+        </code></pre></p>
+        <p>这是Lambda表达式：</p>
+        <p><pre><code class = 'language-java'>
+(int a,int b) ->
+{
+    return a + b;
+}
+        </code></pre></p>
+        <p>或者</p>
+        <p><pre><code class = 'language-java'>
+(a,b) ->
+{
+    return a + b;
+}
+        </code></pre></p>
+        <p>语法是这样的：<code>(参数) -> { 方法体 }</code></p>
+        <p>Lambda表达式过于简化，所以必须要有上下文，编译器才能准确推断出表达式是哪个方法，才能计算出Lambda表达式的值，Lambda表达式的值就是方法的入口地址。</p>
+        <p>具体例子：</p>
+        <p><pre><code class = 'language-java'>
+interface SingleCom
+{
+    abstract int computeSum(int a,int b);
+}
+
+public class BiaoDaShi
+{
+   public static void main(String args[])
+   {
+       SingleCom com = (a,b) ->
+       {
+           return a + b;
+       };//把Lambda表达式的值赋值给接口变量com
+       
+       int result = com.computeSum(10,8);//com就能调用Lambda表达式中接口的方法
+       
+       System.out.println(result);
+   }
+}
+        </code></pre></p>
+        <p>本篇的Lambda表达式和和上一篇的接口回调是相关的。</p>
+        <p><pre><code class = 'language-java'>
+interface ShowMessage
+{
+    void DisplayTrademark(String s);
+}
+
+public class Test
+{
+    public static void main(String args[])
+    {
+        ShowMessage sm;
+        sm = (s) ->
+        {
+          System.out.println("tvtvtvtv");
+          System.out.println(s);
+          System.out.println("tvtvtvtv");
+        };
+        sm.DisplayTrademark("长城牌电视机");//接口回调Lambda表达式实现的接口方法
+
+        sm = (s) ->//接口变量中存放Lambda的值
+        {
+          System.out.println("pcpcpcpc");
+          System.out.println(s);
+          System.out.println("pcpcpcpc");
+        };
+        sm.DisplayTrademark("华为电脑");//接口回调Lambda表达式实现的接口方法
+    }
+}
+        </code></pre></p>
+        <p>这个例子和上一篇的例子是差不多的，可以类比学习。</p>
+    `},
+    {
+        id:"a28",
+        date:"2026年4月3日",
+        category:"Java",
+        title:"Java中的接口与多态",
+        language:"java",
+        fullContent:
+        `<p>接口与多态：由接口产生的多态是指在不同类中实现同一接口时，表现出的不同行为。</p>
+        <p>下面通过一个例子来说明：</p>
+        <p><pre><code class = 'language-java'>
+interface ComputerAverage
+{
+    public double average(double a,double b);
+}
+
+class A implements ComputerAverage
+{
+    public double average(double a,double b)
+    {
+        double aver = 0;
+        aver = (a + b)/2;
+        return aver;
+    }
+}
+
+class B implements ComputerAverage
+{
+    public double average(double a,double b)
+    {
+        double aver = 0;
+        aver = Math.sqrt(a * b);
+        return aver;
+    }
+}
+
+public class JieKouDuoTai
+{
+    public static void main(String args[])
+    {
+        ComputerAverage computer;
+        double a = 11.23;
+        double b = 22.78;
+        computer = new A();
+        double result = computer.average(a,b);
+        System.out.printf("%5.2f和%5.2f的算数平均值是：%5.2f\\n",a,b,result);
+        computer = new B();
+        result = computer.average(a,b);
+        System.out.printf("%5.2f和%5.2f的几何平均值:%5.2f\\n",a,b,result);
+    }
+}
+        </code></pre></p>
+        <p>这个例子中，A,B类都实现了ComputerAverage接口，但它们的average方法有不同的实现，这就是多态的体现。</p>
+    `},
+    {
+        id:"a29",
+        date:"2026年4月4日",
+        category:"Java",
+        title:"Java中的接口参数",
+        language:"java",
+        fullContent:
+        `<p>接口参数是接口中定义的方法的参数。接口参数的使用可以使得接口更加灵活和通用。</p>
+        <p>下面通过一个例子来说明：</p>
+        <p><pre><code class = 'language-java'>
+interface SpeakHello
+{
+    void speakHello();
+}
+
+class Chinese implements SpeakHello
+{
+    public void speakHello()
+    {
+        System.out.println("你好");
+    }
+}
+
+class English implements SpeakHello
+{
+    public void speakHello()
+    {
+        System.out.println("Hello");
+    }
+}
+
+class KindHello
+{
+    public void lookHello(SpeakHello hello)//接口类型参数
+    {
+        hello.speakHello();//接口回调
+    }
+}
+
+public class JieKouCanShu
+{
+    public static void main(String args[])
+    {
+        KindHello a = new KindHello();
+        Chinese ccc = new Chinese();
+        a.lookHello(ccc);
+        a.lookHello(new English());
+        a.lookHello(() -> {System.out.println("no bug");});
+        //向参数传递Lambda的值
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们定义了一个名为SpeakHello的接口，其中包含了一个抽象方法speakHello()。然后我们定义了两个类Chinese和English，它们都实现了SpeakHello接口，并提供了speakHello()方法的具体实现。KindHello类中定义了一个lookHello()方法，它接受一个SpeakHello类型的参数，并调用该参数的speakHello()方法。在main方法中，我们创建了KindHello对象，并通过lookHello()方法传递了不同的SpeakHello实现对象，包括一个Lambda表达式。</p>
+    `},
+    {
+        id:"a30",
+        date:"2026年4月5日",
+        category:"Java",
+        title:"Java中的内部类",
+        language:"java",
+        fullContent:
+        `<p>内部类是定义在另一个类内部的类。内部类可以访问外部类的成员，包括私有成员。内部类的使用可以提高代码的封装性和可读性。</p>
+        <p>包装内部类的类称为内部类的外嵌类。</p>
+        <p>内部类和外嵌类的重要关系：</p>
+        <ul style ='padding-left:1em'>
+            <li>内部类和外嵌类的成员变量在内部类中依然有效，内部类中的方法也可以调用外嵌类中的方法。</li>
+            <li>外嵌类的类体中可以用内部类声明对象，作为外嵌类的成员。</li>
+            <li>内部类仅供他的外嵌类使用，其他类不可以用某个类的内部生命对象。</li>
+            <li>内部类的外嵌类的成员变量在内部类中依然有效，使得内部类和外嵌类的交互更加方便。</li>
+        </ul>
+        <p>举例：</p>
+        <p><pre><code class = 'language-java'>
+package Class;
+
+public class RedCowFarm
+{
+    static  String farmName;
+    RedCow cow;//内部类声明对象
+    RedCowFarm()
+    {
+
+    }
+
+    RedCowFarm(String s)
+    {
+        cow = new RedCow(150,112,5000);
+        farmName = s;
+    }
+
+    public void showCowMess()
+    {
+        cow.speak();
+    }
+
+    class RedCow//内部类的声明
+    {
+        String cowName = "红牛";
+        int height;
+        int weight;
+        int price;
+
+        RedCow(int h,int w,int p)
+        {
+            height = h;
+            weight = w;
+            price = p;
+        }
+
+        void speak()
+        {
+            System.out.println("我是" + cowName + ",身高" + height + "cm体重" + weight + "kg价格" + price + "元，生活在" + farmName);
+        }
+    }//内部类结束
+}//外嵌类结束
+        </code></pre></p>
+        <p><pre><code class = 'language-java'>
+package Class;
+
+public class Test
+{
+    public static void main(String args[])
+    {
+        RedCowFarm farm = new RedCowFarm("红牛农场");
+        farm.showCowMess();
+        farm.cow.speak();
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们定义了一个名为RedCowFarm的外嵌类，其中包含了一个名为RedCow的内部类。RedCow类定义了红牛的属性和方法，而RedCowFarm类则创建了RedCow对象，并通过showCowMess()方法调用了RedCow的speak()方法。在main方法中，我们创建了RedCowFarm对象，并调用了showCowMess()方法和直接访问了cow对象的speak()方法。</p>
+        <p>内部类和外嵌类就像房子和房子里的房间一样，外嵌类是内部类的容器。</p>
+    `},
+    {
+        id:"a31",
+        date:"2026年5月10日",
+        category:"Java",
+        title:"Java中的匿名类",
+        language:"java",
+        fullContent:
+        `<p>在创建子类对象时，除了使用父类的构造方法外还有类体，此类体被认为是一个子类去掉声明后的类体，称作匿名类。</p>
+        <p>匿名类就是一个子类，由于无名可用，所以不可能用匿名类声明对象，但可以直接用匿名类创建一个对象。</p>
+        <p>匿名类有如下特点：</p>
+        <p><ol style= "list-style:none" >
+            <li>(1) 匿名类可以继承父类的方法，也可以重写父类的方法。</li>
+            <li>(2) 在使用匿名类的时候，必然是在某个类中直接用匿名类创建对象，因此匿名类一定是内部类。</li>
+            <li>(3) 匿名类可以访问外嵌类中的成员变量和方法，在匿名类的类体中不可以声明static成员变量和static方法。</li>
+            <li>(4) 由于匿名类是一个子类，且没有类名，所以在用匿名类创建对象的时候要直接使用父类的构造方法。</li>
+            <li>(5) 匿名类不能定义构造方法（因为它没有类名，所以无法定义构造函数）</li>
+        <p>下面举一个简单的例子：</p>
+        <p><pre><code class = 'language-java'>
+interface CanEat 
+{
+    void eat();
+}
+
+public class NiMingLei
+{
+    public static void main(String argss[])
+    {
+        CanEat canEat = new CanEat()
+        {
+            public void eat()
+            {
+                System.out.println("eat");
+            }
+        };
+        canEat.eat();
+    }
+}
+        </code></pre></p>
+        <p>上面的例子中：<code>CanEat canEat = new CanEat(){...};</code>就是匿名类的表现。</p>
+        <p>它重写了eat方法，在接口中，仅仅声明了此方法，匿名类可以实现eat方法。</p>
+        <p>除了这种写法（和接口有关），还有和类有关的。</p>
+        <p><pre><code class = 'language-java'>
+package NiMingLei;
+
+class Cat
+{
+    public void C()
+    {
+
+    }
+}
+public class WuJieKou
+{
+    public static void main(String args[])
+    {
+        Cat cat = new Cat()
+        {
+            public void C()
+            {
+                System.out.println("喵喵");
+            }
+        };
+        cat.C();
+    }
+}
+        </code></pre></p>
+        <p>这个例子也是匿名类，这两个例子的区别就是第一个使用了接口，这个使用类。</p>
+        <p>用lambda表达式也可以代替匿名类。</p>
+        <p><pre><code class = 'language-java'>
+package NiMingLei;
+
+interface SpeakHello
+{
+    void speak();//定义了一个SpeakHellow接口，声明了speak方法
+}
+
+class HelloMachine
+{
+    public void turnOn(SpeakHello hello)//参数是SpeakHello（接口），变量名是hello
+    {
+        hello.speak();//定义了HelloMachine类，实现了一个turnOn方法
+        //接口类型的hello调用接口中的speak方法
+    }
+}
+public class Lambda
+{
+    public static void main(String args[])
+    {
+        HelloMachine machine = new HelloMachine();
+        //machine调用turnOn方法，但turnOn只有一个实现，可以使用lambda表达式
+        // 无参数，方法体就是输出语句，相当于speak的实现
+        machine.turnOn(()->{System.out.println("Hello,you are welcome!");});
+        machine.turnOn(()->{System.out.println("你好，欢迎光临!");});
+    }
+}
+        <p>上面的例子使用了lambda表达式代替匿名类。</p>
+    `},
+    {
+        id:"a32",
+        date:"2026年5月11日",
+        category:"Java",
+        title:"Java中的异常类",
+        language:"java",
+        fullContent:
+        `<p>异常类就是程序运行时可能出现的一些错误。比如：打开一个不存在的文件。</p>
+        <p>Java使用throw关键字抛出一个Exception子类的实例表示异常发生。</p>
+        <p>例如：java.lang包中的Integer类型调用其类方法public static int parseInt(String s)可以将“数字”格式的字符串转换为整数，但是当试图将字符串“ab89”转换为数字时：</p>
+        <p><code>int numer = Integer.parseInt("ab89");</code></p>
+        <p>方法parseInt()在执行过程中会抛出NumberFormatException对象（使用throw关键字抛出一个NumberFormatException对象）,即程序出现NumberFormatException异常。</p>
+        <p>Java允许在定义方法时声明该方法调用过程中可能出现的异常。即允许方法在调用过程中抛出的异常对象，终止当前方法的执行。</p>
+        <p>异常对象可以调用以下方法得到或输出有关异常的信息：</p>
+        <p><ol style= "list-style:none" >
+            <li><code>public String getMessage();</code></li>
+            <li><code>public void printStackTrace();</code></li>
+            <li><code>public String toString();</code></li>
+        </ol></p>
+    `},
+    {
+        id:"a33",
+        date:"2026年5月12日",
+        category:"Java",
+        title:"Java中的try-catch语句",
+        language:"java",
+        fullContent:
+        `<p>Java使用try-catch语句来处理异常，将可能出现的异常操作放在try-catch语句的try部分，一旦try部分抛出异常对象，或调用某个可能抛出异常对象的方法，并且该方法抛出了异常对象，那么try部分将立刻结束执行，转向执行相应的catch部分。</p>
+        <p>try-catch语句可以由几个catch组成，分别处理发生的相应异常。</p>
+        <p>基本语法格式：</p>
+        <p><pre><code class = 'language-java'>
+try
+{
+    ...//可能抛出异常的代码
+}
+catch(异常类型1 变量名1)
+{
+    ...//处理异常类型1的代码
+}
+catch(异常类型2 变量名2)
+{
+    ...//处理异常类型2的代码
+}
+catch(异常类型3 变量名3)
+{
+    ...//处理异常类型3的代码
+}        
+        </code></pre></p><p>
+        下面是一个具体的例子：</p>
+        <p><pre><code class = 'language-java'>
+package YiChangLei;
+
+import java.io.IOException;
+
+public class YiChangLei1
+{
+    public static void main(String args[])
+    {
+        int n = 0;
+        int m = 0;
+        int t = 1000;
+        try
+        {
+            m = Integer.parseInt("8888");
+            n = Integer.parseInt("ab89");
+            t = 7777;
+        }
+        catch (NumberFormatException e)
+        {
+            System.out.println("发生异常" + e.getMessage());
+        }
+        System.out.println("n:" + n +",m:" + m + ",t:" + t);
+        try
+        {
+            System.out.println("故意抛出I/O异常");
+            throw new java.io.IOException("故意的");
+
+        }
+        catch(IOException e)
+        {
+            System.out.println("有异常：" + e.getMessage());
+        }
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们尝试将字符串“ab89”转换为整数，这会抛出NumberFormatException异常，我们在catch块中捕获并处理了这个异常。然后我们故意抛出了一个IOException异常，并在另一个catch块中捕获并处理了这个异常。</p>
+        <p>在第一个try块中，m = 8888 执行成功，m=8888；n有异常，n = 0；而t被跳过了，所以t = 1000。（try捕捉到第一个异常就会停止执行，后面的语句不会执行，类似for循环的break语句。）</p>
+        <p>try捕捉到异常后转到catch块,进行异常处理，最后执行输出语句。</p>
+        <p>第二个try块中，第一条输出语句执行，输出内容，第二条是故意抛出的异常IOException，捕捉到后跳过后面的语句直接转到catch块进行处理。本catch块中处理方式是输出"有异常"，然后把异常情况输出到控制台。</p>
+        <p>所以本程序的输出结果就是那样的。</p>
+        <p>e.getMessage()语句会输出具体的异常信息。比如上面代码中的<code> System.out.println("发生异常" + e.getMessage());</code>,会输出：<code>发生异常 For input string: "ab89"</code></p>
+        <p>这就是try-catch语句的使用方法。</p>
+        <p>需要注意的是：子类异常必须在父类异常之前，否则无法捕获到子类异常。</p>
+        <p>在try-catch中还有finally块，用于执行无论是否发生异常都需要进行的清理工作。</p>
+        <p>需要注意以下两种情况：</p>
+        <p>(1) 如果在try-catch语句中使用了return语句，finally块中的代码仍然会执行。</p>
+        <p>(2) 如果在try-catch语句中使用了System.exit(0)方法，finally块中的代码将不会执行，包括它之后的所有语句。</p>
+        <p>例如：</p>
+        <p><pre><code class = 'language-java'>
+public class FinallyDemo
+{
+    public static void main(String[] args)
+    {
+        System.out.println("=== 测试1：return ===");
+        System.out.println("返回值：" + testReturn());
+        
+        System.out.println("\\n=== 测试2：System.exit ===");
+        testExit();
+        System.out.println("这行不会输出");
+    }
+    
+    public static int testReturn()
+    {
+        try
+        {
+            System.out.println("try 块");
+            return 100;
+        }
+        finally
+        {
+            System.out.println("finally 块 - 我执行了！");
+        }
+    }
+    
+    public static void testExit()
+    {
+        try
+        {
+            System.out.println("try 块");
+            System.exit(0);  // 程序直接退出
+        }
+            finally
+        {
+            System.out.println("finally 块 - 我不会执行");
+        }
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，testReturn()方法中的finally块会执行，即使try块中有return语句。而testExit()方法中的finally块不会执行，因为System.exit(0)会直接终止程序的运行。</p>
+    `},
+    {
+        id:"a34",
+        date:"2026年5月13日",
+        category:"Java",
+        title:"Java中的自定义异常类",
+        language:"java",
+        fullContent:
+        `<p>在编写程序时可以扩展Exception类来创建自定义异常类，然后根据程序的需要来规定哪些方法产生这样的异常。一个方法在声明时可以使用throws关键字声明要产生的若干异常，并在该方法的方法体中具体给出产生异常的操作，即用相应的异常类创建对象，并使用throw关键字抛出异常对象，导致该方法结束执行。</p>
+        <p>程序必须在try-catch语句中调用可能发生异常的方法，其中catch的作用是捕获throw关键字抛出的异常对象。</p>
+        <p>这里要介绍一下throw关键字和throws关键字的区别：</p>
+        <p><u>throws</u>关键字用于方法声明中，表示该方法可能抛出的异常类型。</p>
+        <p><u>throw</u>关键字用于方法体中，用于主动抛出一个异常对象。</p>
+        <p>下面是一个自定义异常类的例子：</p>
+        <p><pre><code class = 'language-java'>
+package YiChangLei;
+
+public class BankException extends Exception
+{
+    //BankException继承了Exception
+    String message;
+    public BankException(int m,int n)
+    {
+        message = "入账资金" + m + "是负数或支出" + n + "是正数，不符合系统要求。";
+    }
+    public String warnMess()
+    {
+        return message;
+    }
+}
+        </code></pre></p>
+        <p><pre><code class = 'language-java'>
+package YiChangLei;
+
+public class Bank
+{
+    private int money;
+    public void income(int in,int out) throws BankException
+    {
+        if(in <= 0 || out >= 0 || in + out <= 0)
+        {//如果入账资金in是负数，或支出out是正数，或入账资金和支出之和是负数或零，那么就抛出BankException异常对象
+            throw new BankException(in,out);//方法抛出异常，导致方法结束
+        }
+        int netIncome = in + out;//计算纯收入
+        System.out.printf("本次计算出的纯收入是：%d\\n元" ,netIncome);
+        money = money + netIncome;//更新银行的资金
+    }
+    public int getMoney()
+    {
+        return money;
+    }
+}
+        </code></pre></p>
+        <p><pre><code class = 'language-java'>
+package YiChangLei;
+
+public class Test
+{
+    public static void main(String[] args)
+    {
+        Bank bank = new Bank();
+        try
+        {
+            bank.income(200,-100);
+            bank.income(300,-100);
+            bank.income(400,-100);
+            System.out.printf("银行目前有%d元\\n",bank.getMoney());
+            bank.income(200,100);//支出是正数，不符合系统要求，抛出异常对象
+            bank.income(99999,-100);//不会执行，因为上面一行抛出异常对象后，try块就结束了，后面的语句不会执行
+        }
+        catch(BankException e)
+        {
+            System.out.println("计算收益的过程出现如下问题：");
+            System.out.println(e.warnMess());//调用异常对象的warnMess()方法输出异常信息
+        }
+        System.out.printf("银行目前有%d元\\n",bank.getMoney());
+    }
+}
+        </code></pre></p>
+        <p>输出结果是：</p>
+        <p>本次计算出的纯收入是：100元</p>
+        <p>本次计算出的纯收入是：200元</p>
+        <p>本次计算出的纯收入是：300元</p>
+        <p>银行目前有600元</p>
+        <p>计算收益的过程出现如下问题：</p>
+        <p>入账资金200是负数或支出100是正数，不符合系统要求。</p>
+        <p>银行目前有600元</p>
+        <p>在这个例子中，我们定义了一个名为BankException的自定义异常类，它继承了Exception类，并包含了一个构造方法和一个warnMess()方法。然后我们定义了一个名为Bank的类，其中包含了一个income()方法，该方法使用throws关键字声明可能抛出的BankException异常，并在方法体中使用throw关键字抛出异常对象。最后，在Test类中，我们创建了Bank对象，并在try-catch块中调用了income()方法，捕获并处理了可能抛出的BankException异常。</p>
+        <p>主方法中，bank调用三次正确的income()方法，将数据传入，并输出此时银行的的金额。第四次调用时，传入的参数不对，出现了异常，第五次调用被跳过，直接转入catch。</p>
+        <p>此时，输出了四行结果。</p>
+        <p>进入catch后，输出异常信息，并输出e.warnMess()的返回值message。此时的m = 200, n = 100,所以输出：入账资金200是负数或支出100是正数，不符合系统要求。</p>
+        <p>catch执行完后执行后续代码，于是输出：银行目前有600元。</p>
+        <p>这就是本程序的执行过程。</p>
+    `},
+    {
+        id:"a35",
+        date:"2026年5月14日",
+        category:"Java",
+        title:"Java中的assert语句",
+        language:"java",
+        fullContent:
+        `<p>断言语句在调试代码阶段非常有用，它可以用来在开发和测试阶段检查程序的假设条件是否成立。</p>
+        <p>java的断言和c语言的断言概念类似，但是由一点区别。</p>
+        <p><table style="width: 100%; border-collapse: collapse; margin: 1rem 0; background: #0a0e16; border-radius: 16px; overflow: hidden;">
+        <thead>
+            <tr style="background: #2a3a4a;">
+                <th style="padding: 12px 16px; text-align: left; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">对比项</th>
+                <th style="padding: 12px 16px; text-align: left; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">Java</th>
+                <th style="padding: 12px 16px; text-align: left; color: #ffd7a0; border-bottom: 2px solid #ffcd94;">C语言</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr style="border-bottom: 1px solid #2a3a4a;">
+                <td style="padding: 12px 16px; color: #e6e2db;">默认启用状态</td>
+                <td style="padding: 12px 16px;color: #e6e2db;">禁用（需要手动开启）</td>
+                <td style="padding: 12px 16px; color: #e6e2db;">启用（无需设置）</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px 16px; color: #e6e2db;">开启方式</td>
+                <td style="padding: 12px 16px;color: #e6e2db;">java -ea MyClass</td>
+                <td style="padding: 12px 16px; color: #e6e2db;">无需开启，直接编译运行</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px 16px; color: #e6e2db;">错误类型</td>
+                <td style="padding: 12px 16px;color: #e6e2db;">AssertionError（继承 Error）</td>
+                <td style="padding: 12px 16px; color: #e6e2db;">调用 abort() 终止程序</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px 16px; color: #e6e2db;">自定义消息</td>
+                <td style="padding: 12px 16px;color: #e6e2db;">可以添加（冒号后）</td>
+                <td style="padding: 12px 16px; color: #e6e2db;">不支持（只能输出表达式）</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px 16px; color: #e6e2db;">正式环境</td>
+                <td style="padding: 12px 16px;color: #e6e2db;">生产环境通常禁用</td>
+                <td style="padding: 12px 16px; color: #e6e2db;">可以保留</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px 16px; color: #e6e2db;">引入版本</td>
+                <td style="padding: 12px 16px;color: #e6e2db;">Java 1.4（2002年）</td>
+                <td style="padding: 12px 16px; color: #e6e2db;">C99 标准化，但早期就有</td>
+            </tr>
+        </tbody>
+        </table></p>
+        <p>以上就是Java断言语句和C语言断言的对比。</p>
+        <p>断言语句的语法格式：</p>
+        <p><code>assert booleanException;</code></p>
+        <p><code>assert booleanException:messageExpection;</code></p>
+        <p>例如，对于：<code>assert number > 0;</code>, 如果 number <= 0，将会抛出 AssertionError 异常，程序立刻结束执行。如果number > 0,程序继续执行。</p>
+        <p>如果使用：<code>assert booleanException;</code>，那么当断言失败时，会抛出 AssertionError 异常，程序会从断言处停止执行。</p>
+        <p>如果使用：<code>assert booleanException:messageException;</code>，那么当断言失败时，会抛出 AssertionError 异常，并附带指定的错误消息（messageException表达式的值）。</p>
+        <p>assert示例：</p>
+        <p><pre><code class = 'language-java'>
+package Assert;
+
+public class C
+{
+    public  static void main(String[] args)
+    {
+        int score[] = {-120,98,89,120,99};
+        int sum = 0;
+        for(int number:score)
+        {
+            assert number >= 0:"负数不能是成绩";
+            sum = sum + number;
+        }
+        System.out.println("总成绩" + sum);
+    }
+}
+        </code></pre></p>
+        <p>在这个例子中，我们定义了一个包含成绩的数组score，其中有一个负数-120。我们使用assert语句来检查每个成绩是否为非负数，如果遇到负数，断言将失败，抛出AssertionError异常，并输出消息“负数不能是成绩”。如果所有成绩都为非负数，程序将继续执行并计算总成绩。</p>
+        <p>注意：断言语句在生产环境中通常被禁用，以避免影响程序的性能和稳定性。在调试程序的时候可以使用-ea选项启用断言。</p>
+        <p>而且：断言捕获到的异常是 Error 类型，不需要用 try-catch 捕获。</p>
+    `},
+    {
+        id:"a40",
+        date:"2026年4月6日",
+        category:"数据结构",
+        title:"数据结构的概述",
+        language:"c",
+        fullContent:
+        `<p>1. 什么是数据结构？</p>
+        <p>数据结构是计算机科学中的一个重要概念，它指的是在计算机中组织和存储数据的方式。数据结构的设计和选择对于算法的效率和性能有着直接的影响。常见的数据结构包括数组、链表、栈、队列、树、图等。</p>
+        <p>数据是信息的载体，能够被计算机识别、存储和加工处理。数据包括文字、表格、图像等。</p>
+        <p>数据的基本单位是<u>数据元素（Data Element）</u>。通常把数据元素作为一个整体进行处理。</p>
+        <p><u>数据对象</u>是具有相同类型的数据元素的集合。</p>
+        <p><u>数据项</u>是数据元素中具有独立意义的最小标识单位。</p>
+        <p><u>数据结构</u>是数据元素相互关系之间存在一种或多种特定关系数据元素的集合。</p>
+        <p>归纳起来，数据结构一般包括一下三方面的内容：</p>
+        <p><ul style ='padding-left:1em'>
+            <li>数据逻辑结构</li>
+            <li>数据存储结构</li>
+            <li>数据运算</li>
+        </ul></p>
+        <p>数据运算的定义是基于逻辑结构的，实现是基于存储结构的。</p>
+        <p>&nbsp;</p>
+        <p>2. 数据的逻辑结构</p>
+        <p>数据元素之间的逻辑关系整体称为数据的逻辑结构。</p>
+        <p>数据元素在计算机中的存储方式称为数据的存储结构。</p>
+        <p>根据元素之间的逻辑关系的不同特性，分为下列4种类型：</p>
+        <p><ul style ='padding-left:1em'>
+            <li><u>集合</u>:包含的所有元素同属于一个集合（数据元素之间没有关系，集合是最一种松散的逻辑结构）。</li>
+            <li><u>线性结构</u>:数据元素之间存在一对一的关系。</li>
+            <li><u>树形结构</u>:数据元素之间存在一对多的关系。</li>
+            <li><u>图形结构</u>:数据元素之间存在多对多的关系。</li>
+        </ul></p>
+        <p>数据的逻辑结构可以采用多种方式描述，<u>二元组</u>是一种既常用也十分通用的数据逻辑结构表示方式。</p>
+        <p>每个关系用偶序集合表示，一个偶序表示两个元素之间的相邻关系，用尖括号表示有向关系：<a,b>表示 a->b,;圆括号表示无向关系：(a,b)表示 a-b。</p>
+        <p>&nbsp;</p>
+        <p>3. 数据的存储结构</p>
+        <p>数据逻辑结构在计算机存储器中的表示称为数据的<u>存储结构(存储表示)</u>,也称为数据的物理结构。</p>
+        <p>(1)顺序的存储结构：</p>
+        <p>顺序的存储结构是采用一组连续的存储单元来存放所有的数据元素，而且逻辑上相邻的元素的存储单元也相邻。</p>
+        <p>主要优点是节省存储空间，可实现队数据的随机存取。</p>
+        <p>主要缺点是不便于修改，在对元素进行插入或删除操作时可能需要移动大量元素。</p>
+        <p>(2)链式存储结构：</p>
+        <p>链式存储结构是采用一组任意的存储单元来存放所有的数据元素，这些存储单元可以是连续的，也可以是不连续的。</p>
+        <p>每个结点单独储存，无须占用一整块存储空间，但为了表示结点之间的关系，需要在每个结点附加指针字段，用于存放相邻结点的存储地址。</p>
+        <p>主要优点是便于修改，在进行插入和删除操作时，不需要移动大量元素。</p>
+        <p>主要缺点是存储空间的利用率较低。，分配给每个结点的存储单元有一部分被用来存放结点之间的关系了，也没有随机存取。</p>
+        <p>(3)索引存储结构：</p>
+        <p>索引存储结构是通过建立索引来提高数据检索效率的一种存储方式。它将数据元素的键值和其在存储器中的位置建立映射关系，从而加快数据的查找速度。</p>
+        <p>优点是检索速度快，查找效率高。缺点是需要额外的存储空间来存放索引，增加了时间和空间的开销。</p>
+        <p>(4)哈希（散列）存储结构：</p>
+        <p>哈希存储结构是通过哈希函数将数据元素的键值映射到存储位置的一种存储方式。也就是根据元素的关键字快速定位到数据的存储位置，从而实现快速的数据查找和插入操作。</p>
+        <p>优点是查找和插入操作的时间复杂度较低，缺点是可能会出现哈希冲突，需要额外的处理机制（只存储数据本身，不存储元素之间的逻辑关系）。</p>
+        <p>&nbsp;</p>
+        <p>4. 数据运算</p>
+        <p>包括运算定义和运算实现两部分。前者描述运算的功能，比较抽象;后者是在存储结构上设计对应运算的实现算法，是具体的。</p>
+        <p>&nbsp;</p>
+        <p>5. 算法及其描述</p>
+        <p>算法的特性：</p>
+        <p><u>算法</u>是对特定问题求解步骤的一种描述，他是指令的有限序列，其中每条指令表示一个或多个操作。</p>
+        <p>算法的设计应满足一下几个目标：</p>
+        <p><ul style ='padding-left:1em'>
+            <li>正确性：算法必须能够正确地解决问题，得到预期的结果。</li>
+            <li>高效率与低存储量：算法应该在合理的时间内完成任务，尽量减少资源的消耗。</li>
+            <li>可读性：算法应该易于理解和维护，代码清晰、结构合理。</li>
+            <li>健壮性：算法应该能够处理各种输入情况，包括边界条件和异常情况。</li>
+            <li>可使用性（用户友好性）：算法应该易于实现和应用，具有良好的可扩展性。</li>
+        </ul></p>
+        <p>算法的五大特性：</p>
+        <p><ul style ='padding-left:1em'>
+            <li>输入：算法有零个或多个输入，这些输入是算法在运行时需要处理的数据。</li>
+            <li>输出：算法有一个或多个输出，这些输出是算法处理输入后产生的结果。</li>
+            <li>确定性：算法的每一步操作都是明确的，没有歧义，确保在相同的输入下得到相同的输出。</li>
+            <li>有限性（有穷性）：算法必须在有限的步骤内完成，不能无限循环。</li>
+            <li>可行性：算法中的每一步操作都必须是可行的，能够在有限的时间内完成。</li>
+        </ul></p>
+        <p>&nbsp;</p>
+        <p>6.算法分析</p>
+        <p>计算机资源主要包括计算时间和内存空间。</p>
+        <p>算法的时间复杂度和空间复杂度是衡量算法性能的重要指标。</p>
+        <p>衡量算法的好坏的四个标准：</p>
+        <p><ul style ='padding-left:1em'>
+            <li>算法的正确性：能对合法、非法、边界输入都得到正确结果。</li>
+            <li>算法的可读性：算法应该易于理解和维护，代码清晰、结构合理。</li>
+            <li>算法的时间复杂度：执行算法所需的时间与输入规模的关系。</li>
+            <li>算法的空间复杂度：算法执行过程中所需的存储空间与输入规模的关系。</li>
+        </ul></p>
+        <p>算法的时间复杂度和空间复杂度在下一篇中详细介绍。</p>
+    `},
+    {
+        id:"a41",
+        date:"2026年4月7日",
+        category:"数据结构",
+        title:"时间复杂度，空间复杂度",
+        language:"c",
+        fullContent:
+        `<p>1. 时间复杂度和空间复杂度是衡量算法性能的两个重要指标。时间复杂度描述了算法执行时间随输入规模增长的变化趋势，而空间复杂度描述了算法所需存储空间随输入规模增长的变化趋势。</p>
+        <p>时间复杂度通常用大O符号表示，例如O(1)、O(n)、O(n^2)等，表示算法的执行时间与输入规模n的关系。常见的时间复杂度有：</p>
+        <ul style ='padding-left:1em'>
+            <li>O(1)：常数时间复杂度，表示算法的执行时间不随输入规模的变化而变化。</li>
+            <li>O(log n)：对数时间复杂度，表示算法的执行时间随着输入规模的增加而增加，但增长速度较慢。</li>
+            <li>O(n)：线性时间复杂度，表示算法的执行时间与输入规模成正比关系。</li>
+            <li>O(n log n)：线性对数时间复杂度，表示算法的执行时间随着输入规模的增加而增加，但增长速度比O(n)更快。</li>
+            <li>O(n^2)：平方时间复杂度，表示算法的执行时间与输入规模的平方成正比关系。</li>
+        </ul>
+        <p>&nbsp;</p>
+        <p>2. 空间复杂度通常也用大O符号表示，例如O(1)、O(n)等，表示算法所需存储空间与输入规模n的关系。常见的空间复杂度有：</p>
+        <ul style ='padding-left:1em'>
+            <li>O(1)：常数空间复杂度，表示算法所需存储空间不随输入规模的变化而变化。</li>
+            <li>O(n)：线性空间复杂度，表示算法所需存储空间与输入规模成正比关系。</li>
+            <li>O(n^2)：平方空间复杂度，表示算法所需存储空间与输入规模的平方成正比关系。</li>
+        </ul>
+        <p>在设计和分析算法时，了解时间复杂度和空间复杂度是非常重要的，可以帮助我们选择更高效的算法来解决问题。</p>
+        <p>在实际应用中，对于时间复杂度和空间复杂度的计算需要根据具体的算法和数据结构进行分析。</p>
+        <p>一般情况下，我们更关注时间复杂度，因为它直接影响算法的执行效率。</p>
+        <p><u>计算时，一般以最坏情况下的时间复杂度为准。空间复杂度的计算也类似。</u></p>
+    `},
+    {
+        id:"a42",
+        date:"2026年4月8日",
+        category:"数据结构",
+        title:"顺序表（ArrayList）",
+        language:"c",
+        fullContent:
+        `<p>线性表：是由n(n≥0)个相同类型数据元素组成的有限序列。当n = 0时记为空表。</p>
+        <p>在线性逻辑表示中，a<sub>1</sub>为开始元素，a<sub>n</sub>称为终端元素（尾元素）</p>
+        <p>对于任意一对相邻元素，<a<sub>i</sub>,a<sub>i + 1</sub>>(1 ≤ i ≤ n),a<sub>i</sub>是a<sub>i + 1</sub>的前驱元素（或结点），a<sub>i + 1</sub>是a<sub>i</sub>的后继元素。</p>
+        <p>顺序表（ArrayList），是线性表用数组实现的具体子类，是一种基于数组实现的数据结构，它提供了动态调整大小的功能。顺序表中的元素在内存中是连续存储的，因此可以通过索引快速访问元素。顺序表支持插入、删除和查找等基本操作。</p>
+        <p>本篇主要实现一下顺序表的8个基本操作：初始化，销毁，求表的长度，求表的第i个元素，按值查找，插入，删除，输出元素。</p>
+        <p>首先是顺序表的定义，还包含了头文件：&ltstdio.h&gt</p>
+        <p><pre><code class = 'language-c'>
+#define _CRT_SECURE_NO_WARNINGS//防止C语言编译器报错，允许使用scanf等不安全的函数
+#define MAX_SIZE 100//顺序表的最大长度为100，可以根据需要调整
+#include&ltstdio.h&gt
+
+//顺序表的定义
+typedef int ElemType;//假设顺序表中存储的是整数类型的元素，可以根据需要修改为其他类型
+typedef struct
+{
+	ElemType data[MAX_SIZE];//ElemType类型的数组data,用来存放数据，最大是MAX_SIZE
+	int length;//长度
+}SqList;   
+        </code></pre></p>
+        <p>上面的代码就是顺序表的定义</p>
+        <p>下面是顺序表的8个基本操作的实现：</p>
+        <p>1. 初始化顺序表运算算法</p>
+        <p>初始化线性表，将顺序表的长度置为0</p>
+        <p><pre><code class = 'language-c'>
+void InitList(SqList& L)//初始化顺序表L要回传给实参，所以用引用类型
+{
+	L.length = 0;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>2. 销毁顺序表运算算法</p>
+        <p><pre><code class = 'language-c'>
+void DestroyList(SqList L)
+{
+//顺序表是静态分配的，不需要时会自动释放内存，所以销毁顺序表的操作可以不做任何处理。
+}
+        </code></pre></p>
+        <p>3. 求表的长度运算算法</p>
+        <p>返回的是线性表的长度</p>
+        <p><pre><code class = 'language-c'>
+int GetLength(SqList L)
+{
+	return L.length;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>4. 求表的第i个元素运算算法</p>
+        <p>首先判断i是否合法，这里的i是从1开始，无效返回0，取到元素返回1</p>
+        <p><pre><code class = 'language-c'>
+int GetElem(SqList L, int i, ElemType& e)
+{
+	if (i<1 || i>L.length)
+	{
+		return 0;//无效的i值返回0
+	}
+	else
+	{
+		e = L.data[i - 1];//取元素并且返回1
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>5. 按值查找运算算法</p>
+        <p>首先定义一个计数器i（此时的i是下标），从合法范围（0~L.length - 1）内找到第一个值是x的位置。当i >= 表长，返回0，未找到；否则找到，返回i + 1（位置 = 下标i + 1）,原因：i从0开始</p>
+        <p><pre><code class = 'language-c'>
+int Locate(SqList L, ElemType x)
+{
+	int i = 0;
+	while (i < L.length && L.data[i] != x)
+	{
+		i++;//查找第一个值为x的元素，范围为0~L.length - 1
+    }    
+
+		if (i >= L.length)
+		{
+			return 0;//未找到返回0
+		}
+		else
+		{
+			return (i + 1);//找到返回位置
+		}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>6. 插入运算算法(后插)</p>
+        <p>思路：先判断能否插入，再将第i个位置及以后的元素向后移动一位，然后在第i个位置插入新元素，判断是否插入成功，长度+1</p>
+        <p>首先判断顺序表是否满了，以及i是否合法（此时的i是位置，从1开始，到L.length，但由于是插入，i的合法范围变成了2 ~ L.length）</p>
+        <p>然后循环变量j从顺序表末尾L.length开始循环遍历到i，将元素挨个往后挪一个位置。<u>为了保证不越界，使用的是把前一个数据j - 1放到后一个数据j</u>，而不是把j放到j + 1</p>
+        <p>而i处就是要插入的位置，此时j = i，j处的元素在j + 1处，j - 1 的元素不变，就空出来了一个位置，把元素放进去，长度L.length = L.length + 1</p>
+        <p>最后，成功返回1</p>
+        <p><pre><code class = 'language-c'>
+int InsElem(SqList& L, ElemType x,int i)
+{
+	int j;
+	if (i < 1 || i > L.length + 1 || L.length == MAX_SIZE)
+	{
+		return 0;//无效的i值或顺序表已满返回0
+	}
+	for (j = L.length; j >= i ; j--)
+	{
+		L.data[j] = L.data[j - 1];//将第i个位置及以后的元素向后移动一位
+    }
+		L.data[i - 1] = x;//在第i个位置插入新元素
+		L.length++;//长度+1
+		return 1;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>7. 删除运算算法</p>
+        <p>思路：先判断能否删除，再将第i个位置及以后的元素向前移动一位，判断是否删除成功，长度-1</p>
+        <p>判断位置有效同上一个算法。</p>
+        <p>定义一个循环变量j，从i处开始遍历到末尾（此时的j是下标，关系：j是i - 1处的元素开始，不能到L.length，否则数组越界）。</p>
+        <p>这里for循环的j就是从i + 1处开始到L.length - 1处遍历</p>
+        <p>将后一个元素j放到前一个元素j - 1处（这里是把i + 1处的元素放到i处，用循环变量j来实现而已），最后将表长-1，成功返回1</p>
+        <p><pre><code class = 'language-c'>
+int DelElem(SqList& L, int i)
+{
+	int j;
+	if (i < 1 || i > L.length)
+	{
+		return 0;//无效的i值返回0
+	}
+	for (j = i; j < L.length; j++)
+	{
+		L.data[j - 1] = L.data[j];//将第i个位置及以后的元素向前移动一位
+	}
+	L.length--;//长度-1
+	return 1;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>8. 输出元素运算算法</p>
+        <p>for循环，长度0~L.length - 1，输出数据。</p>
+        <p><pre><code class = 'language-c'>
+void DispList(SqList L)
+{
+	int i;
+	for (i = 0; i < L.length; i++)
+	{
+		printf("%d ",L.data[i]);//循环输出元素，范围是0~L.length - 1
+	}
+    printf("\\n");
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>函数的声明：</p>
+        <p><pre><code class = 'language-c'>
+void InitList(SqList& L);
+void DestroyList(SqList L);
+int GetLength(SqList L);
+int GetElem(SqList L, int i, ElemType& e);
+int Locate(SqList L, ElemType x);
+int InsElem(SqList& L, ElemType x, int i);
+int DelElem(SqList& L, int i);
+void DispList(SqList L);
+        </code></pre></p>
+        <p>测试8个基本运算：（主函数）</p>
+        <p><pre><code class = 'language-c'>
+int main()
+{
+	int i;
+	ElemType e;
+	SqList L;
+
+	InitList(L);
+	InsElem(L,1,1);//插入元素1到位置1
+	InsElem(L,3,2);//插入元素3到位置2
+	InsElem(L,1,3);//插入元素1到位置3
+	InsElem(L,5,4);//插入元素5到位置4
+	InsElem(L,4,5);//插入元素4到位置5
+	InsElem(L,2,6);//插入元素2到位置6
+	printf("线性表：");
+	DispList(L);//输出线性表
+	printf("长度:%d\\n",GetLength(L));//输出线性表的长度
+	i = 3;
+	GetElem(L,i,e);//获取线性表的第i个元素,并且把元素值赋给e
+	printf("第%d个元素：%d\\n",i,e);
+	e = 1;
+	printf("元素%d是第%d个元素\\n",e,Locate(L,e));//按值查找元素e在顺序表中的位置
+	i = 4;
+	printf("删除第%d个元素：\\n",i);
+	DelElem(L,i);//删除第i个元素
+	printf("输出线性表：");
+	DispList(L);//输出线性表
+	DestroyList(L);//销毁线性表
+    return 0;
+}
+        </code></pre></p>
+        <p>本测试的时间复杂度为O(n)</p>
+        <p>输出：</p>
+        <p><线性表：1 3 1 5 4 2 长度:6</p>
+        <p>第3个元素：1</p>
+        <p>元素1是第1个元素</p>
+        <p>删除第4个元素：</p>
+        <p>输出线性表：1 3 1 4 2</p>
+        <p>&nbsp;</p>
+        <p>总结：</p>
+        <p>在顺序表的八个算法中：</p>
+        <p>时间复杂度为O(n)的是：按值查找，插入运算（后插），删除运算，输出元素</p>
+        <p>在此篇来说：5，6，7，8的时间复杂度是O(n)</p>
+        <p>时间复杂度O(1)的是：初始化，销毁，求表长，表的第i个元素</p>
+        <p>也就是：1，2，3，4的时间复杂度是O(1)</p>
+    `},
+    {
+        id:"a43",
+        date:"2026年4月10日",
+        category:"数据结构",
+        title:"单链表（Linked List）",
+        language:"c",
+        fullContent:
+        `<p>单链表（Linked List）是一种线性数据结构，它由一系列节点组成，每个节点包含一个数据元素和一个指向下一个节点的指针。单链表的特点是动态存储，插入和删除操作效率较高，但访问元素的效率较低。</p>
+        <p>注意：单链表的头结点不存储数据，只作为标识。比如说：<u>L -> d1 -> d2 -> d3 -> NULL</u></p>
+        <p>头结点就是L(无数据),首结点就是d1(有数据，位置为1，下标为1)</p>
+        <p>单链表的定义如下：</p>
+        <p><pre><code class = 'language-c'>
+#define _CRT_SECURE_NO_WARNINGS
+#include &ltstdio.h&gt
+#include &ltstdlib.h&gt//包括了malloc函数的头文件
+
+//单链表节点声明
+typedef int ElemType;
+typedef struct node
+{
+	ElemType data;//数据域
+	struct node* next;//指针域
+}SLinkNode;
+        </code></pre></p>
+        <p>上面的代码定义了单链表的节点结构体，其中包含一个数据域和一个指针域。数据域用于存储节点的数据，指针域用于指向下一个节点。</p>
+        <p>下面是单链表的基本操作的实现：</p>
+        <p>1. 初始化单链表</p>
+        <p><pre><code class = 'language-c'>
+//初始化单链表运算
+void InitList(SLinkNode*& L)
+{
+	L = (SLinkNode*)malloc(sizeof(SLinkNode));//创建头结点L
+	L->next = NULL;//L的指针域置为空，即链表中只有一个结点：首结点
+}
+        </code></pre></p>
+        <p><u>就是这样的：L -> NULL</u></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>2. 销毁单链表</p>
+        <p>先创建两个指针pre，p，pre指向头结点，p指向首结点，（pre在第一个，p在第二个）</p>
+        <p>此时，p比pre先遍历完整个连链表，所以while循环的条件是当p != NULL 时，先释放pre,再把pre和p指向同一个位置，p再往后移一位，直到p指向NULL跳出循环。</p>
+        <p>最后，pre指向的是链表的最后一个结点，此时再把pre指向的结点释放，就完成了销毁运算。</p>
+        <p><pre><code class = 'language-c'>
+//销毁单链表运算算法
+void DestroyList(SLinkNode*& L)
+	SLinkNode* pre = L;//pre头结点
+	SLinkNode *p = pre->next;//首结点（和头结点相邻，为pre的下一个结点）
+	while (p != NULL)
+	{
+		free(pre);//释放pre结点
+		pre = p;//pre指针循环往后移
+		p = p->next;//p指针循环往后同步移动
+	}
+	free(pre);//最后将pre指向的尾结点结点释放
+}
+        </code></pre></p>
+        <p><u>L(pre) -> d1(p) -> d2 -> d3 -> NULL,然后d1(pre) -> d2(p) -> d3 -> NULL,最后d3(pre) -> NULL(p),此时在循环外面，再free(pre)就销毁完了</u></p>
+        <p>本算法的时间复杂度是O(n)</p>
+        <p>3. 求表的长度</p>
+        <p>先定义一个计数器，记的是数组下标。</p>
+        <p>创建一个指针p指向头结点，当p不为空时，计数器加1，然后p指向下一个结点，直到p为空，此时的计数器的值就是链表的长度（元素的个数）</p>
+        <p><pre><code class = 'language-c'>
+//求单链表的长度运算算法
+int GetLength(SLinkNode* L)
+{
+	int i = 0;//计数器
+	SLinkNode* p = L->next;//p指向头结点
+	while (p != NULL)
+	{
+		i++;//计数器+1（p是第二个结点，第一次循环时i = 0，所以要先i++再指向下一个结点）
+		p = p->next;//循环指向下一个结点
+	}
+	return i;
+}
+        </code></pre></p>
+        <p><u>L -> d1(p) -> d2 -> d3 -> NULL，p往后移动一下，i就加1，直到p指向NULL，此时i的值就是链表的长度</u></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>4. 求表的第i个元素</p>
+        <p>先定义一个计数器j，然后创建一个指针p指向头结点，先判断i的位置，当i <= 0时，返回0；当p不为空且j < i时，计数器加1，然后p指向下一个结点，直到p为空或j = i，此时j的值就是第i个元素的位置（当j=0时，p指向L,j = 1时，p指向第一个数据结点,此时的i=1）。</p>
+        <p>所以i和j指向的是一个地方。然后把数据取出来放到e中，返回1。但是，在取元素之前，还要判断以下p是不是空的，因为在while中最后执行了p = p->next，跳出循环后p指向的就是下一个结点，但是这个结点还未判断是不是空的，所以还要再判断一次，再进行取元素的操作。</p>
+        <p><pre><code class = 'language-c'>
+//求单链表第i个元素运算算法
+int GetElem(SLinkNode* L, int i, ElemType& e)
+{
+	int j = 0;//计数器
+	SLinkNode* p = L;//指向头结点
+
+	if (i <= 0)
+	{
+		return 0;//位置i <= 0，不合法，返回0
+	}
+
+	while (p != NULL && j < i)
+	{
+		j++;//同上一个算法（求单链表长度算法）
+		p = p -> next;
+	}
+
+	if (p == NULL)
+	{
+		return 0;//p为空，没找到，返回0
+	}
+	else
+	{
+		e = p -> data;//元素放到e中
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p><u>L(p,j=0) -> d1(i=1) -> d2 -> d3(j=3,i=3,出while) -> NULL,比如i=3,p指向d3</u></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>5. 按值查找</p>
+        <p>先定义一个计数器和指针p,p指向首结点（非头结点，因为j此时是1并且头结点不存元素，下标为0）</p>
+        <p>循环判断p的data域是否等于e并且p是否为空，不为空且值不相同就计数器+1,p指针往后移。</p>
+        <p>跳出循环时，p的data域等于e，p为空，所以分开判断，如果为空就返回0，不为空时，那就是p的data域等于e，此时的j就是元素e的位置（不是下标）</p>
+        <p><pre><code class = 'language-c'>
+//按值查找算法(返回第一次出现的位置)
+int Locate(SLinkNode* L, ElemType e)
+{
+	int j = 1;//计数器
+	SLinkNode* p = L -> next;
+
+	while (p != NULL && p -> data != e)
+	{
+		p = p -> next;
+		j++;
+	}
+
+	if (p == NULL)
+	{
+		return 0;//没找到
+	}
+	else
+	{
+		return j;//找到返回位置j
+	}
+}
+        </code></pre></p>
+        <p><u>L -> d1(p,i=1,j=1) -> d2 -> d3(j=3,i=3,出while) -> NULL,i=3时,值是d3,j=3,return 3</u></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>6. 插入</p>
+        <p>思路：先找到要插入位置的前一个结点p，再创建一个新的结点s，先将s的next指针指向p的下一个结点，再将p的next指向s。</p>
+        <p>首先判断插入位置的合法性，i不能<0，再循环判断p是否为空和j是否小于i-1，满足条件就循环往后移动，直到不满足。</p>
+        <p>此时p为空或j = i - 1 = k(k是插入位置的下标),判断p是否为空（跳出循环前又往后移动了一位，所以要重新判断），然后执行插入操作。</p>
+        <p>创建一个空间s，data是x，将s的next指针和p的next指针指向同一个空间，再将p的next连到s，就完成了插入。</p>
+        <p><pre><code class = 'language-c'>
+//插入元素算法
+int InsElem(SLinkNode*& L, ElemType x, int i)
+{
+	int j = 0;//计数器，是下标
+	SLinkNode* p = L;//指向头结点（也可以int k = i - 1）来让i变成下标k
+	SLinkNode* s;
+	if (i < 0)
+	{
+		return 0;
+	}
+	while (p != NULL && j < i-1)
+    {//找到第i个位置的前一个结点p，j是计数器，p是指针
+     //j从0开始，p从头结点开始，当j = i - 1时，p指向第i个位置的前一个结点
+		j++;
+		p = p -> next;
+	}
+	if (p == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		s = (SLinkNode*)malloc(sizeof(SLinkNode));//创建新结点s
+		s->data = x;//把元素x放到s的data域
+		s->next = p->next;//把s的next指针指向p的下一个结点
+		p->next = s;//把p的next指针指向s
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p><u>L(p,j=0) -> d1(i=1,j=1,出while,p) -> d2(i=2,j=2) -> d3 -> NULL,i=2</u></p>
+        <p><u>执行s->next = p->next时s(data=x) -> d2,原表变为L -> d1=s -> d2 -> d3 -> NULL</u></p>
+        <p><u>执行p->next = s时链表变为L -> d1 -> s -> d2 -> d3 -> NULL,插入成功，在原来d2(i=2)的位置插入了新结点s</u></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>7. 删除</p>
+        <p>思路：先找到要删除元素的前一个结点，修改next指针，指向删除元素的下一个结点，最后释放被删除的结点。</p>
+        <p>前面的做法和上一个插入运算类似，这里只讲解删除操作。</p>
+        <p>p的next指针指向的是要删除的结点的前一个结点，p指向的是要删除的结点。</p>
+        <p>首先要判断q是否为空，不为空就先把p的next指针指向q的下一个结点，再释放q结点(先连q的下一个结点是为了防止断链)。</p>
+        <p><pre><code class = 'language-c'>
+//删除元素算法
+int DelElem(SLinkNode*& L,int i)
+{
+	int j = 0;
+	SLinkNode* p = L;
+	SLinkNode* q;
+	if (i <= 0)//位置i <= 0，不合法，返回0
+	{
+		return 0;
+	}
+	while (p != NULL && j < i - 1)
+	{
+		j++;
+		p = p->next;
+	}
+	if (p == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		q = p -> next;//q指向要删除的结点
+		if (q == NULL)//要删除的结点不存在，返回0
+		{
+			return 0;
+		}
+		else
+		{
+			p->next = q->next;//把p的next指针指向q的下一个结点
+			free(q);//释放q结点
+			return 1;
+		}
+	}
+}
+        </code></pre></p>
+        <p><u>L(p,j=0) -> d1(j=1,i=1,出while,p) -> d2(j=2,i=2) -> d3 -> NULL,i=2(删d2)</u></p>
+        <p><u>执行q = p -> next时，链表变为L -> d1(p) -> d2(p) -> d3 -> NULL</u></p>
+        <p><u>执行p->next = q->next时，链表变为L -> d1(p) -> d3 -> NULL 且 d2(q) -> d3,将d2和d1的链断了，但是和d3的链还存在</u></p>
+        <p><u>最后执行free(q),释放q结点，链表变成了：L -> d1(p) -> d3 -> NULL,删除成功</u></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>8. 输出元素</p>
+        <p><pre><code class = 'language-c'>
+//输出单链表运算算法
+void DispList(SLinkNode* L)
+{
+	SLinkNode* p = L -> next;
+	while (p != NULL)
+	{
+		printf("%d ",p->data);
+		p = p->next;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>函数声明：</p>
+        <p><pre><code class = 'language-c'>
+//函数的声明
+void InitList(SLinkNode*& L);
+void DestroyList(SLinkNode*& L);
+int GetLength(SLinkNode* L);
+int GetElem(SLinkNode* L, int i, ElemType& e);
+int Locate(SLinkNode* L, ElemType e);
+int InsElem(SLinkNode*& L, ElemType x, int i);
+int DelElem(SLinkNode*& L, int i);
+void DispList(SLinkNode* L);
+        </code></pre></p>
+        <p>测试8个基本运算：（主函数）</p>
+        <p><pre><code class = 'language-c'>
+//主函数
+int main()
+{
+	int i;
+	ElemType e;
+	SLinkNode* L;
+
+	InitList(L);
+	InsElem(L,1,1);
+	InsElem(L,3,2);
+	InsElem(L,1,3);
+	InsElem(L,5,4);
+	InsElem(L,4,5);
+	InsElem(L,2,6);
+	printf("单链表：");
+	DispList(L);
+	printf("长度：%d\\n",GetLength(L));
+	i = 3;
+	GetElem(L,i,e);
+	printf("第%d个元素：%d\\n",i,e);
+	e = 1;
+	printf("元素%d是第%d个元素\\n",e,Locate(L,e));
+	i = 4;
+	printf("删除第%d个元素\\n",i);
+	DelElem(L,i);
+	printf("输出单链表：");
+	DispList(L);
+	DestoryList(L);
+	return 0;
+}
+        </code></pre></p>
+        <p>本测试的时间复杂度为O(n)</p>
+        <p>输出：</p>
+        <p>单链表：1 3 1 5 4 2</p>
+        <p>长度：6</p>
+        <p>第3个元素：1</p>
+        <p>元素1是第1个元素</p>
+        <p>删除第4个元素</p>
+        <p>输出单链表：1 3 1 4 2</p>
+        <p>&nbsp;</p>
+        <p>总结：</p>
+        <p>在单链表的八个算法中：</p>
+        <p>时间复杂度为O(n)的是：销毁单链表，求表的长度，求表的第i个元素，按值查找，插入运算，删除运算，输出元素</p>
+        <p>在此篇来说：2，3，4，5，6，7，8的时间复杂度是O(n)</p>
+        <p>时间复杂度O(1)的是：初始化单链表</p>
+        <p>也就是：1的时间复杂度是O(1)</p>
+    `},
+    {
+        id:"a44",
+        date:"2026年4月12日",
+        category:"数据结构",
+        title:"循环单链表（Circular Single Linked List）",
+        language:"c",
+        fullContent:
+        `<p>循环单链表（Circular Single Linked List）是一种特殊的单链表，其中最后一个节点的指针指向第一个节点，形成一个环状结构。循环单链表的特点是可以从任意节点开始遍历整个链表，适用于需要循环访问数据的场景。</p>
+        <p>就是尾结点的next指向头结点(把尾结点的next域由原来的NULL改为指向头结点)。特点是：从任一结点出发都可以找到表中其他结点。</p>
+        <p>循环单链表的定义如下：</p>
+        <p><pre><code class = 'language-c'>
+#define _CRT_SECURE_NO_WARNINGS
+#include &ltstdio.h&gt
+#include &ltstdlib.h&gt
+
+typedef int ElemType;
+typedef struct node
+{
+	ElemType data;
+	struct node* next;
+}CSLinkNode;
+        </code></pre></p>
+        <p>上面的代码定义了循环单链表的节点结构体，其中包含一个数据域和一个指针域。数据域用于存储节点的数据，指针域用于指向下一个节点。</p>
+        <p>循环单链表的基本操作与单链表类似，只是在遍历时需要注意循环的条件，以避免死循环。具体实现可以参考单链表的操作，只需在适当的位置修改指针的指向即可。</p>
+        <p>上面的代码就是循环单链表的定义</p>
+        <p>下面是循环单链表的8个基本操作的实现：</p>
+        <p>1. 初始化循环单链表运算算法</p>
+        <p><pre><code class = 'language-c'>
+void InitList(CSLinkNode*& L)
+{
+	L = (CSLinkNode*)malloc(sizeof(CSLinkNode));//创建头结点L
+    L -> next = L;//L的指针域指向自己，即链表中只有一个结点：头结点
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>2. 销毁循环单链表运算算法</p>
+        <p>先创建两个指针pre，p，pre指向头结点，p指向头结点的下一个结点（也就是第一个数据结点）。</p>
+        <p>此时，p比pre先遍历完整个连链表，所以while循环的条件是当p != L时，先释放pre,再把pre和p指向同一个位置，p再往后移一位，直到p指向L跳出循环。</p>
+        <p>最后，pre指向的是链表的最后一个结点，此时再把pre指向的结点释放，就完成了销毁运算。</p>
+        <p><pre><code class = 'language-c'>
+void DestroyList(CSLinkNode* L)
+{
+	CSLinkNode* pre,*p;
+	pre = L;
+	p = L->next;
+	while (p != L)
+	{
+		free(pre);
+		pre = p;
+		p = p->next;
+	}
+	free(pre);
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度是O(n)</p>
+        <p>3. 求表的长度</p>
+        <p>算法和单链表类似，所以就不讲解了。</p>
+        <p><pre><code class = 'language-c'>
+int GetLength(CSLinkNode* L)
+{
+	int i = 0;
+	CSLinkNode* p = L->next;
+	while (p != L)
+	{
+		i++;
+		p = p->next;
+	}
+	return i;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>4. 求表的第i个元素</p>
+        <p>表的结构类似于：L -> data1 -> data2 -> ... -> dataN -> L</p>
+        <p>首先定义一个计数器j，从1开始，指针p指向第一个数据节点（首结点）</p>
+        <p>判断位置i是否有效,就是判断i是否在[1, GetLength(L)]范围内。然后while循环，以p是否为L并且j < i为条件，循环使得p指向第下一个结点，直到p指向位置i，所以跳出循环的条件就是p == L或者j == i</p>
+        <p>由于出循环后没有判断p是否为L，所以需要在循环后添加判断。不为L,就把p->data赋值给e</p>
+        <p><pre><code class = 'language-c'>
+int GetElem(CSLinkNode* L, int i, ElemType& e)
+{
+	int j = 1;
+	CSLinkNode* p = L->next;
+	if (i <= 0)
+	{
+		return 0;
+	}
+	while (p != L && j < i)
+	{
+		j++;
+		p = p->next;
+	}
+	if (p == L)
+	{
+		return 0;
+	}
+	else
+	{
+		e = p->data;
+		return 1;
+	}
+}   
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>5. 按值查找</p>
+        <p>算法和单链表类似，所以就不讲解了。</p>
+        <p><pre><code class = 'language-c'>
+int Locate(CSLinkNode* L, ElemType x)
+{
+	CSLinkNode* p = L->next;
+	int i = 1;
+	while (p != L && p->data != x)
+	{
+		i++;
+		p = p->next;
+	}
+	if (p == L)
+	{
+		return 0;
+	}
+	else
+	{
+		return i;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>6. 插入</p>
+        <p>首先定义了一个计数器j，从1开始，pre指向头结点，p指向首结点（也就是第一个数据结点），p和pre相邻。</p>
+        <p>判断位置i是否有效，将pre和p一起往后移动，直到j==i或者p==L</p>
+        <p>判断此时的p是否为L,<u>并且判断i >j + 1（i是位置，j也是位置，i的最大值是j - 1,超过就不是合法位置）</u></p>
+        <p>然后创建结点s，data域为x,s的next指针和pre指针指向同一个空间p（插入前的位置关系是：pre -> p，这一步是pre = s -> p），然后更改pre指针,使它指向s结点(pre -> s -> p)，于是便插入成功了。</p>
+        <p><pre><code class = 'language-c'>
+int InsElem(CSLinkNode*& L, ElemType x, int i)
+{
+	int j = 1;
+	CSLinkNode* pre = L;
+	CSLinkNode* p = pre->next;
+	CSLinkNode* s;
+	if (i <= 0)
+	{
+		return 0;
+	}
+	while (p != L && j < i )
+	{
+		j++;
+		pre = p;
+		p = p->next;
+	}
+	if (p == L && i >j + 1)//当i > j + 1时，说明i不是合法位置，返回0
+	{
+		return 0;
+	}
+	else
+	{
+		s = (CSLinkNode*)malloc(sizeof(CSLinkNode));
+		s->data = x;
+		s->next = pre->next;
+		pre->next = s;
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>7. 删除</p>
+        <p>大致和单链表的删除一样，这里就不细讲解了。</p>
+        <p>在</p>
+        <p><pre><code class = 'language-c'>
+int DelElem(CSLinkNode*& L, int i)
+{
+	int j = 0;
+	CSLinkNode* p = L, * post;//p指向的是头结点
+	if (i <= 0)
+	{
+		return 0;
+	}
+	while (p->next != L && j < i - 1)//首结点（第一个数据结点）为L的时候就是这样(L -> L)，所以p->next != L的条件是为了找到第i个位置的前一个结点，j是计数器，p是指针
+	{
+		j++;
+		p = p->next;
+	}
+	if (p->next == L)//和上面一样，删除位置不合法，返回0
+	{
+		return 0;
+	}
+	else
+	{
+		post = p->next;//post指向被删除元素
+		if (post == L)//L -> d1 -> d2 -> d3 -> L,当post指向L时，说明要删除的元素不存在，返回0
+		{
+			return 0;
+		}
+		else//post指向要删除的结点，p指向要删除结点的前一个结点，比如上面的例子，当要删除d2时，post指向d2，p指向d1，此时把p的next指针指向post的下一个结点（d3），再释放post结点，就完成了删除操作。
+		{
+			p->next = post->next;//这一步就是把p的next指针指向post的下一个结点
+			free(post);//释放post结点
+			return 1;
+		}
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>8. 输出元素</p>
+        <p><pre><code class = 'language-c'>
+void DispList(CSLinkNode* L)
+{
+	CSLinkNode* p = L->next;
+	while (p != L)
+	{
+		printf("%d ",p->data);
+		p = p->next;
+	}
+	printf("\\n");
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>函数声明：</p>
+        <p><pre><code class = 'language-c'>
+void InitList(CSLinkNode*& L);
+void DestroyList(CSLinkNode* L);
+int GetLength(CSLinkNode* L);
+int GetElem(CSLinkNode* L, int i, ElemType& e);
+int Locate(CSLinkNode* L, ElemType x);
+int InsElem(CSLinkNode*& L, ElemType x, int i);
+int DelElem(CSLinkNode*& L, int i);
+void DispList(CSLinkNode* L);
+        </code></pre></p>
+        <p>测试8个基本运算：（主函数）</p>
+        <p><pre><code class = 'language-c'>
+int main()
+{
+	int i = 0;
+	CSLinkNode* L;
+	ElemType x;
+	InitList(L);
+	InsElem(L, 1, 1);
+	InsElem(L, 2, 2);
+	InsElem(L, 3, 3);
+	InsElem(L, 4, 4);
+	InsElem(L, 5, 5);
+	printf("输出线性表：");
+	DispList(L);
+	printf("输出表长：%d\\n",GetLength(L));
+	i = 2;
+	GetElem(L, i, x);
+	printf("求第%d个位置的元素：%d\\n",i,x);
+	x = 4;
+	printf("查找元素是%d的位置：%d\\n",x,Locate(L,x));
+	i = 3;
+	DelElem(L,i);
+	printf("输出删除位置%d的元素的线性表：",i);
+	DispList(L);
+	DestroyList(L);
+	return 0;
+}
+        </code></pre></p>
+        <p>本测试的时间复杂度为O(n)</p>
+        <p>输出：</p>
+        <p>输出线性表：1 2 3 4 5</p>
+        <p>输出表长：5</p>
+        <p>求第2个位置的元素：2</p>
+        <p>查找元素是4的位置：4</p>
+        <p>输出删除位置3的元素的线性表：1 2 4 5</p>
+        <p>&nbsp;</p>
+        <p>总结：</p>
+        <p>在循环单链表的八个算法中：</p>
+        <p>时间复杂度为O(n)的是：销毁循环单链表，求表的长度，求表的第i个元素，按值查找，插入运算，删除运算，输出元素</p>
+        <p>在此篇来说：2，3，4，5，6，7，8的时间复杂度是O(n)</p>
+        <p>时间复杂度O(1)的是：初始化循环单链表</p>
+        <p>也就是：1的时间复杂度是O(1)</p>
+    `},
+    {
+        id:"a45",
+        date:"2026年4月14日",
+        category:"数据结构",
+        title:"双链表（Doubly Linked List）",
+        language:"c",
+        fullContent:
+        `<p>双链表（Doubly Linked List）是一种线性数据结构，它由一系列节点组成，每个节点包含一个数据元素和两个指针，分别指向前一个结点（前驱结点）和后一个结点（后继结点）。链表的特点是动态存储，插入和删除操作效率较高，但访问元素的效率较低。</p>
+        <p>而在单链表中，每个结点的指针指向下一个结点（后继结点），故从任一结点找其后继结点很方便，但是找前驱结点比较困难。在双链表中，增加了一个指向前驱结点的指针域prior，这样形成的链表就有两条不同方向的链，使得从给定结点出发查找其前驱结点和后继结点都变得很方便。</p>
+        <p>下面是双链表的定义：</p>
+        <p><pre><code class = 'language-c'>
+#define _CRT_SECURE_NO_WARNINGS
+#include &ltstdio.h&gt
+#include &ltstdlib.h&gt
+
+typedef int ElemType;
+typedef struct node
+{
+	ElemType data;
+	struct node * prior, * next;
+}DLinkNode;
+        </code></pre></p>
+        <p>上面的代码定义了双链表的节点结构体，其中包含一个数据域和两个指针域。数据域用于存储节点的数据，prior指针用于指向前一个节点，next指针用于指向下一个节点。</p>
+        <p>双链表的基本操作与单链表类似，只是在遍历时需要注意前驱结点和后继结点的关系，以确保正确地更新指针。具体实现可以参考单链表的操作，只需在适当的位置修改指针的指向即可。</p>
+        <p>上面的代码就是双链表的定义</p>
+        <p>下面是双链表的8个基本操作的实现：</p>
+        <p>1. 初始化双链表运算算法</p>
+        <p><pre><code class = 'language-c'>
+void InitList(DLinkNode*& L)
+{
+	L = (DLinkNode*)malloc(sizeof(DLinkNode));
+	L->next = NULL;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>和单链表的一样</p>
+        <p>2. 销毁双链表运算算法</p>
+        <p><pre><code class = 'language-c'>
+void DestroyList(DLinkNode* L)
+{
+	DLinkNode* pre = L;
+	DLinkNode* p = pre->next;
+	while (p != NULL)
+	{
+		free(pre);
+		pre = p;
+		p = p->next;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>和循环单链表一样</p>
+         <p>3. 求表的长度</p>
+        <p><pre><code class = 'language-c'>
+int GetLength(DLinkNode* L)
+{
+	int i = 0;
+	DLinkNode* p = L->next;
+	while (p != NULL)
+	{
+		p = p->next;
+		i++;
+	}
+	return i;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>和单链表一样</p>
+         <p>4. 求表的第i个元素</p>
+        <p><pre><code class = 'language-c'>
+int GetElem(DLinkNode* L, int i, ElemType& e)
+{
+	int j = 0;
+	DLinkNode* p = L;
+	if (i <= 0)
+	{
+		return 0;
+	}
+	while (p != NULL && j < i)
+	{
+		j++;
+		p = p->next;
+	}
+	if (p == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		e = p->data;
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>和单链表一样</p>
+        <p><pre><code class = 'language-c'>
+int Locate(DLinkNode* L, ElemType e)
+{
+	int i = 1;
+	DLinkNode* p = L->next;
+	while(p != NULL && p->data != e)
+	{
+		i++;
+		p = p->next;
+	}
+	if (p == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		return i;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>和单链表一样</p>
+        <p>6. 插入</p>
+        <p>插入操作前面的和单链表一样，只讲双链表的插入操作。</p>
+        <p>创建一个空间s，存放数据x，s和p的next域放的是同一个结点。</p>
+        <p>判断p的后继是否为空（p是不是尾结点），是尾结点就把p的后继结点的prior域指向s。是尾结点就跳过这一步。</p>
+        <p>s的prior域指向p,p的next域指向s，就完成了插入操作。</p>
+        <p><pre><code class = 'language-c'>
+int InsElem(DLinkNode*& L, int i, ElemType x)
+{
+	int j = 0;
+	DLinkNode* p = L;
+	DLinkNode* s;
+	if (i <= 0)
+	{
+		return 0;
+	}
+	while (p != NULL && j < i - 1)
+	{
+		p = p->next;
+		j++;
+	}
+	if (p == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		s = (DLinkNode*)malloc(sizeof(DLinkNode));
+		s->data = x;
+		s->next = p->next;
+		if (p->next != NULL)//如果p的后继结点不为空（p不是尾结点），就把p的后继结点的prior域指向s
+		{
+			p->next->prior = s;//把p的后继结点的prior域指向s
+		}
+		s->prior = p;//把s的prior域指向p
+		p->next = s;//把p的next域指向s
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p><u>L <-> d1 <-> d2 <-> d3 <-> d4 <-> d5 <-> d6 <-> NULL(假设i = 3,则p = d2,s是新结点，s在p后面)</u></p>
+        <p><u>执行s->next = p->next时，s(data=x) -> d3,原表变为L <-> d1 <-> d2（p）(s -> d3) <-> d3 <-> d4 <-> d5 <-> d6 <-> NULL</u></p>
+        <p><u>执行p->next->prior = s时，d3的prior域指向s，链表变为L <-> d1 <-> d2(p)(s <-> d3) <-> d3 <-> d4 <-> d5 <-> d6 <-> NULL</u></p>
+        <p><u>执行s->prior = p时，s的prior域指向p，链表变为L <-> d1 <-> d2(p)(p <- s <-> d3) <-> d3 <-> d4 <-> d5 <-> d6 <-> NULL</u></p>
+        <p><u>执行p->next = s时，p的next域指向s，链表变为L <-> d1 <-> d2(p) <-> s <-> d3 <-> d4 <-> d5 <-> d6 <-> NULL,插入成功，在原来d3(i=3)的位置插入了新结点s</u></p>
+        <p>7. 删除</p>
+        <p>删除操作：和代码的注释一样</p>
+        <p><pre><code class = 'language-c'>
+int DelElem(DLinkNode*& L, int i)
+{
+	DLinkNode* p = L;
+	DLinkNode* pre;
+	int j = 0;
+	if (i <= 0)
+	{
+		return 0;
+	}
+	while (p != NULL && j < i)
+	{
+		j++;
+		p = p->next;
+	}
+	if (p == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		pre = p->prior;//pre指向要删除元素的前一个结点
+		if (p->next != NULL)//如果p的后继结点不为空（p不是尾结点），就把p的后继结点的prior域指向pre
+		{
+			p->next->prior = pre;//把p的后继结点的prior域指向pre
+			pre->next = p->next;//把pre的next域指向p的后继结点
+		}
+		free(p);
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p><u>L <-> d1 <-> d2(p) <-> d3 <-> d4 <-> d5 <-> d6 <-> NULL(假设i = 3,则p = d3,pre = d2)</u></p>
+        <p><u>执行p->next->prior = pre时，d4的prior域指向pre，链表变为L <-> d1 <-> d2(pre) <-> d3(p) <-> d4(且d2 <- d4) <-> d5 <-> d6 <-> NULL</u></p>
+        <p><u>执行pre->next = p->next时，pre的next域指向p的后继结点，链表变为L <-> d1 <-> d2(pre) <-> d4 <-> d5 <-> d6 <-> NULL,删除成功，在原来d3(i=3)的位置删除了d3</u></p>
+        <p>最后再free(p),释放d3的内存就完成了删除操作。</p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>和单链表一样</p>
+        <p>8. 输出元素</p>
+        <p><pre><code class = 'language-c'>
+void DispList(DLinkNode* L)
+{
+	DLinkNode* p = L->next;
+	while (p != NULL)
+	{
+		printf("%d ",p->data);
+		p = p->next;
+	}
+	printf("\\n");
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>和单链表一样</p>
+        <p>函数声明：</p>
+        <p><pre><code class = 'language-c'>
+void InitList(DLinkNode*& L);
+void DestroyList(DLinkNode* L);
+int GetLength(DLinkNode* L);
+int GetElem(DLinkNode* L, int i, ElemType& e);
+int Locate(DLinkNode* L, ElemType e);
+int InsElem(DLinkNode*& L, int i, ElemType e);
+int DelElem(DLinkNode*& L, int i);
+void DispList(DLinkNode* L);
+        </code></pre></p>
+        <p>测试8个基本运算：（主函数）</p>
+        <p><pre><code class = 'language-c'>
+int main()
+{
+	int i;
+	ElemType x;
+	DLinkNode* L;
+	InitList(L);
+	InsElem(L,1,1);
+	InsElem(L,2,2);
+	InsElem(L,3,3);
+	InsElem(L,4,4);
+	InsElem(L,5,5);
+	InsElem(L,6,6);
+	printf("输出双链表：");
+	DispList(L);
+	printf("双链表的长度是：%d\\n",GetLength(L));
+	i = 2;
+	GetElem(L, i, x);
+	printf("位置%d的元素是：%d\\n",i,x);
+	x = 3;
+	printf("元素%d在位置%d\\n",x,Locate(L,x));
+	i = 4;
+	DelElem(L,i);
+	printf("删除位置为%d的元素\\n",i);
+	printf("输出删除后的双链表：");
+	DispList(L);
+	DestroyList(L);
+	return 0;
+}
+        </code></pre></p>
+        <p>本测试的时间复杂度为O(n)</p>
+        <p>输出：</p>
+        <p>输出双链表：1 2 3 4 5 6</p>
+        <p>双链表的长度是：6</p>
+        <p>位置2的元素是：2</p>
+        <p>元素3在位置3</p>
+        <p>删除位置为4的元素</p>
+        <p>输出删除后的双链表：1 2 3 5 6</p>
+        <p>&nbsp;</p>
+        <p>总结：</p>
+        <p>在双链表的八个算法中：</p>
+        <p>时间复杂度为O(n)的是：销毁双链表，求表的长度，求表的第i个元素，按值查找，插入运算，删除运算，输出元素</p>
+        <p>在此篇来说：2，3，4，5，6，7，8的时间复杂度是O(n)</p>
+        <p>时间复杂度O(1)的是：初始化双链表</p>
+        <p>也就是：1的时间复杂度是O(1)</p>
+    `},
+    {
+         id:"a46",
+        date:"2026年4月16日",
+        category:"数据结构",
+        title:"循环双链表（Circular Doubly Linked List）",
+        language:"c",
+        fullContent:
+        `<p>循环双链表（Circular Doubly Linked List）是一种特殊的双链表，其中最后一个节点的指针指向第一个节点，形成一个环状结构。循环双链表的特点是可以从任意节点开始遍历整个链表，适用于需要循环访问数据的场景。</p>
+    `},
+    {
+        id:"a47",
+        date:"2026年4月18日",
+        category:"数据结构",
+        title:"顺序栈（Stack）",
+        language:"c",
+        fullContent:
+        `<p>栈（Stack）是一种线性数据结构，它遵循后进先出（LIFO）的原则。栈中的元素只能在一端进行插入和删除操作，这一端被称为栈顶。栈的基本操作包括入栈（push）、出栈（pop）和获取栈顶元素（top）。</p>
+        <p>本篇讲的是顺序栈的实现，链栈在下一篇哦~</p>
+        <p>栈的定义如下：</p>
+        <p><pre><code class = 'language-c'>
+#define _CRT_SECURE_NO_WARNINGS
+#define MAX_SIZE 100
+#include &ltstdio.h&gt
+
+typedef int ElemType;
+typedef struct
+{
+	ElemType data[MAX_SIZE];
+	int top;
+}SqStack;
+        </code></pre></p>
+        <p>上面的代码定义了顺序栈的数据结构，其中包含一个数组用于存储栈中的元素和一个整数top用于指示栈顶的位置。</p>
+        <p>下面是栈的基本操作的实现：</p>
+        <p>1. 初始化栈</p>
+        <p><pre><code class = 'language-c'>
+void InitStack(SqStack& st)
+{
+	st.top = -1;//栈顶指针初始化为-1，表示栈为空
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>2. 销毁栈</p>
+        <p><pre><code class = 'language-c'>
+void DestroyStack(SqStack st)
+{
+    //顺序栈是静态分配的，不需要时会自动释放内存，所以销毁栈的操作可以不做任何处理。
+}
+        </code></pre></p>
+        <p>3. 入栈</p>
+        <p><pre><code class = 'language-c'>
+int Push(SqStack& st,ElemType x)
+{
+	if (st.top == MAX_SIZE - 1)//栈满，无法入栈
+	{
+		return 0;
+	}
+	else
+	{
+		st.top++;//栈顶指针先加1，再将元素放到栈顶
+		st.data[st.top] = x;//将元素放到栈顶
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>4. 出栈</p>
+        <p><pre><code class = 'language-c'>
+int Pop(SqStack& st, ElemType& x)
+{
+	if (st.top == -1)//栈空，无法出栈
+	{
+		return 0;
+	}
+	else
+	{
+		x = st.data[st.top];//将栈顶元素放到x中
+		st.top--;//栈顶指针减1，表示出栈成功
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>5. 获取栈顶元素</p>
+        <p><pre><code class = 'language-c'>
+int GetTop(SqStack st, ElemType& x)
+{
+	if (st.top == -1)
+	{
+		return 0;
+	}
+	else
+	{
+		x = st.data[st.top];
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>6. 判断栈是否为空</p>
+        <p><pre><code class = 'language-c'>
+int StackEmpty(SqStack st)
+{
+	if (st.top == -1)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>函数声明：</p>
+        <p><pre><code class = 'language-c'>
+void InitStack(SqStack& st);
+void DestroyStack(SqStack st);
+int Push(SqStack& st, ElemType x);
+int Pop(SqStack& st, ElemType& x);
+int GetTop(SqStack st, ElemType& x);
+int StackEmpty(SqStack st);
+        </code></pre></p>
+        <p>测试6个基本运算：（主函数）</p>
+        <p><pre><code class = 'language-c'>
+int main()
+{
+	SqStack st;
+	ElemType e;
+	printf("初始化栈st\\n");
+	InitStack(st);
+	printf("栈%s\\n",(StackEmpty(st)==1?"空":"不空"));
+	printf("a 进栈\\n");
+	Push(st, 'a');
+	printf("b 进栈\\n");
+	Push(st, 'b'); 
+	printf("c 进栈\\n");
+	Push(st, 'c');
+	printf("d 进栈\\n");
+	Push(st, 'd');
+	printf("栈%s\\n",(StackEmpty(st)==1?"空":"不空"));
+	GetTop(st, e);
+	printf("栈顶元素：%c\\n",e);
+	printf("出栈次序：");
+	while (!StackEmpty(st))
+	{ 
+		Pop(st, e);
+		printf("%c ", e);
+	}
+	printf("\\n");
+	DestroyStack(st);
+	return 0;
+}
+        </code></pre></p>
+        <p>本测试的时间复杂度为O(n)</p>
+        <p>输出：</p>
+        <p>初始化栈st</p>
+        <p>栈空</p>
+        <p>a 进栈</p>
+        <p>b 进栈</p>
+        <p>c 进栈</p>
+        <p>d 进栈</p>
+        <p>栈不空</p>
+        <p>栈顶元素：d</p>
+        <p>出栈次序：d c b a</p>
+    `},
+    {
+        id:"a48",
+        date:"2026年4月20日",
+        category:"数据结构",
+        title:"链栈",
+        language:"c",
+        fullContent:
+        `<p>链栈是一种基于链表实现的栈数据结构，它遵循后进先出（LIFO）的原则。链栈中的元素通过节点链接在一起，每个节点包含一个数据元素和一个指向下一个节点的指针。链栈的基本操作包括入栈（push）、出栈（pop）和获取栈顶元素（top）等算法。</p>
+        <p>链栈的定义如下：</p>
+        <p><pre><code class = 'language-c'>
+#define _CRT_SECURE_NO_WARNINGS
+#define MAX_SIZE 100
+#include &ltstdio.h&gt
+#include &ltstdlib.h&gt
+
+typedef int ElemType;
+typedef struct node
+{
+	ElemType data;
+	struct node* next;
+}LinkStack;
+        </code></pre></p>
+        <p>上面的代码定义了链栈的数据结构，其中包含一个数据域用于存储栈中的元素和一个指针域用于指向下一个节点。</p>
+        <p>下面是链栈的基本操作的实现：</p>
+        <p>1. 初始化链栈</p>
+        <p><pre><code class = 'language-c'>
+void InitStack(LinkStack*& lt)
+{
+	lt = NULL;//链栈初始化为NULL，表示栈为空
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>2. 销毁链栈</p>
+        <p><pre><code class = 'language-c'>
+void DestroyStack(LinkStack* ls)
+{
+	LinkStack* pre = ls;//pre指向首结点
+	LinkStack* p;//p指向pre的下一个结点，但是要先判断pre是否为NULL，否则会出错
+
+	if (pre == NULL)
+	{
+		return;
+	}
+
+	p = pre->next;//p指向pre的下一个结点
+
+	while (p != NULL)
+	{
+		free(pre);//释放pre结点
+		pre = p;//pre指针循环往后移
+		p = p->next;//p指针循环往后同步移动
+	}
+	free(pre);
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>3. 入栈</p>
+        <p><pre><code class = 'language-c'>
+int Push(LinkStack*& ls, ElemType x)
+{
+	LinkStack* p;
+	p = (LinkStack*)malloc(sizeof(LinkStack));//创建一个新的结点p
+	p->data = x;//将元素x放到p的data域中
+	p->next = ls;//将p的next指针指向当前的栈顶结点ls
+	ls = p;//将p赋值给ls，表示p成为新的栈顶结点
+	return 1;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>4. 出栈</p>
+        <p><pre><code class = 'language-c'>
+int Pop(LinkStack*& ls, ElemType& x)
+{
+	LinkStack* p;
+
+	if (ls == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		p = ls;//p指向当前的栈顶结点
+		x = p->data;//将栈顶元素放到x中
+		ls = p->next;//将p的下一个结点赋值给ls，表示出栈成功
+		free(p);//释放p结点
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>5. 获取栈顶元素</p>
+        <p><pre><code class = 'language-c'>
+int GetTop(LinkStack* ls, ElemType& x)
+{
+	if (ls == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		x = ls->data;//将栈顶元素放到x中
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>6. 判断栈是否为空</p>
+        <p><pre><code class = 'language-c'>
+int StackEmpty(LinkStack* ls)
+{
+	if (ls == NULL)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>函数声明：</p>
+        <p><pre><code class = 'language-c'>
+void InitStack(LinkStack*& lt);
+void DestroyStack(LinkStack* ls);
+int Push(LinkStack*& ls, ElemType x);
+int Pop(LinkStack*& ls, ElemType& x);
+int GetTop(LinkStack* ls, ElemType& x);
+int StackEmpty(LinkStack* ls);
+        </code></pre></p>
+        <p>测试6个基本运算：（主函数）</p>
+        <p><pre><code class = 'language-c'>
+int main()
+{
+	LinkStack *st;
+	ElemType e;
+	printf("初始化栈ls\\n");
+	InitStack(st);
+	printf("栈%s\\n", (StackEmpty(st) == 1 ? "空" : "不空"));
+	printf("a 进栈\\n");
+	Push(st, 'a');
+	printf("b 进栈\\n");
+	Push(st, 'b');
+	printf("c 进栈\\n");
+	Push(st, 'c');
+	printf("d 进栈\\n");
+	Push(st, 'd');
+	printf("栈%s\\n", (StackEmpty(st) == 1 ? "空" : "不空"));
+	GetTop(st, e);
+	printf("栈顶元素：%c\\n", e);
+	printf("出栈次序：");
+	while (!StackEmpty(st))
+	{
+		Pop(st, e);
+		printf("%c ", e);
+	}
+	printf("\\n");
+	DestroyStack(st);
+	return 0;
+}
+        </code></pre></p>
+        <p>本测试的时间复杂度为O(n)</p>
+        <p>输出：</p>
+        <p>初始化栈ls</p>
+        <p>栈空</p>
+        <p>a 进栈</p>
+        <p>b 进栈</p>
+        <p>c 进栈</p>
+        <p>d 进栈</p>
+        <p>栈不空</p>
+        <p>栈顶元素：d</p>
+        <p>出栈次序：d c b a</p>
+    `},
+    {
+        id:"a49",
+        date:"2026年4月22日",
+        category:"数据结构",
+        title:"顺序队列（Queue）",
+        language:"c",
+        fullContent:
+        `<p>队列（Queue）是一种线性数据结构，它遵循先进先出（FIFO）的原则。队列中的元素只能在一端进行插入操作，这一端被称为队尾；只能在另一端进行删除操作，这一端被称为队头。队列的基本操作包括入队（enqueue）、出队（dequeue）和获取队头元素（gethead）等算法。</p>
+        <p>本篇讲的是顺序队列的实现，链队列在下一篇哦~</p>
+        <p>队列的定义如下：</p>
+        <p><pre><code class = 'language-c'>
+#define _CRT_SECURE_NO_WARNINGS
+#define MAX_SIZE 100
+#include &ltstdio.h&gt
+typedef char ElemType;
+typedef struct
+{
+	ElemType data[MAX_SIZE];
+	int front;
+	int rear;
+}SqQueue;
+        </code></pre></p>
+        <p>上面的代码定义了顺序队列的数据结构，其中包含一个数组用于存储队列中的元素和两个整数front和rear分别用于指示队头和队尾的位置。</p>
+        <p>下面是队列的基本操作的实现：</p>
+        <p>1. 初始化队列</p>
+        <p><pre><code class = 'language-c'>
+void InitQueue(SqQueue& sq)
+{
+	sq.front = sq.rear = 0;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>2. 销毁队列</p>
+        <p><pre><code class = 'language-c'>
+void DestroyQueue(SqQueue sq)
+{
+
+}
+        </code></pre></p>
+        <p>3. 入队</p>
+        <p><pre><code class = 'language-c'>
+int EnQueue(SqQueue& sq, ElemType x)
+{
+	if ((sq.rear + 1) % MAX_SIZE == sq.front)
+	{
+		return 0;
+	}
+	else
+	{
+		sq.rear = (sq.rear + 1) % MAX_SIZE;
+		sq.data[sq.rear] = x;
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>4. 出队</p>
+        <p><pre><code class = 'language-c'>
+int DeQueue(SqQueue& sq, ElemType& x)
+{
+	if (sq.front == sq.rear)
+	{
+		return 0;
+	}
+	else
+	{
+		sq.front = (sq.front + 1) % MAX_SIZE;
+		x = sq.data[sq.front];
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>5. 获取队头元素</p>
+        <p><pre><code class = 'language-c'>
+int GetHead(SqQueue sq, ElemType& x)
+{
+	if (sq.rear == sq.front)
+	{
+		return 0;
+	}
+	else
+	{
+		x = sq.data[(sq.front + 1) % MAX_SIZE];
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>6. 判断队列是否为空</p>
+        <p><pre><code class = 'language-c'>
+int EmptyQueue(SqQueue sq)
+{
+	if (sq.rear == sq.front)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>函数声明：</p>
+        <p><pre><code class = 'language-c'>
+void InitQueue(SqQueue& sq);
+void DestroyQueue(SqQueue sq);
+int EnQueue(SqQueue& sq, ElemType x);
+int DeQueue(SqQueue& sq, ElemType& x);
+int GetHead(SqQueue sq, ElemType& x);
+int EmptyQueue(SqQueue sq);
+        </code></pre></p>
+        <p>测试6个基本运算：（主函数）</p>
+        <p><pre><code class = 'language-c'>
+int main()
+{
+	SqQueue sq;
+	ElemType e;
+
+	printf("初始化队列\\n");
+	InitQueue(sq);
+	printf("队%s\\n", (EmptyQueue(sq) == 1 ? "空":"不空"));
+	printf("a进队\\n");
+	EnQueue(sq, 'a');
+	printf("b进队\\n");
+	EnQueue(sq, 'b');
+	printf("c进队\\n");
+	EnQueue(sq, 'c');
+	printf("d进队\\n");
+	EnQueue(sq, 'd');
+	printf("队%s\\n", (EmptyQueue(sq) == 1 ? "空" : "不空"));
+	GetHead(sq, e);
+	printf("队头元素：%c\\n",e);
+	printf("出队次序：");
+	while (!EmptyQueue(sq))
+	{
+		DeQueue(sq, e);
+		printf("%c ", e);
+	}
+	printf("\\n");
+	DestroyQueue(sq);
+	return 0;
+}
+        </code></pre></p>
+        <p>本测试的时间复杂度为O(n)</p>
+        <p>输出：</p>
+        <p>初始化队列</p>
+        <p>队空</p>
+        <p>a进队</p>
+        <p>b进队</p>
+        <p>c进队</p>
+        <p>d进队</p>
+        <p>队不空</p>
+        <p>队头元素：a</p>
+        <p>出队次序：a b c d</p>
+    `},
+    {
+        id:"a50",
+        date:"2026年4月24日",
+        category:"数据结构",
+        title:"链队列",
+        language:"c",
+        fullContent:
+        `<p>链队列是一种基于链表实现的队列数据结构，它遵循先进先出（FIFO）的原则。链队列中的元素通过节点链接在一起，每个节点包含一个数据元素和一个指向下一个节点的指针。链队列的基本操作包括入队（enqueue）、出队（dequeue）和获取队头元素（gethead）等算法。</p>
+        <p>链队列的定义如下：</p>
+        <p><pre><code class = 'language-c'>
+#define _CRT_SECURE_NO_WARNINGS
+#define MAX_SIZE 100
+#include &ltstdio.h&gt
+#include &ltstdlib.h&gt
+
+typedef char ElemType;
+typedef struct QNode
+{
+	ElemType data;//数据域
+	struct QNode* next;//指针域
+}QType;//链队列的结点类型
+
+typedef struct qptr
+{
+	QType* front;//指向队头结点
+	QType* rear;//指向队尾结点
+}LinkQueue;//链队列的类型
+        </code></pre></p>
+        <p>上面的代码定义了链队列的数据结构，其中包含一个数据域用于存储队列中的元素和一个指针域用于指向下一个节点。</p>
+        <p>下面是链队列的基本操作的实现：</p>
+        <p>1. 初始化链队列</p>
+        <p><pre><code class = 'language-c'>
+void InitQueue(LinkQueue*& lq)
+{
+	lq = (LinkQueue*)malloc(sizeof(LinkQueue));//创建一个新的链队列
+	lq->rear = lq->front = NULL;//链队列初始化为NULL，表示队列为空
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>2. 销毁链队列</p>
+        <p><pre><code class = 'language-c'>
+void DestroyQueue(LinkQueue* lq)
+{
+	QType* pre = lq->front;//pre指向首结点
+	QType* p;
+	if (pre != NULL)
+	{
+		if (pre == lq->rear)//只有一个结点，直接释放pre结点即可
+		{
+			free(pre);
+		}
+		else
+		{
+			p = pre->next;//p指向pre的下一个结点
+			while (p != NULL)//循环释放pre结点，直到p指向NULL
+			{
+				free(pre);//释放pre结点
+				pre = p;//pre指针循环往后移
+				p = p->next;//p指针循环往后同步移动
+			}
+			free(pre);//最后将pre指向的尾结点结点释放
+		}
+	}
+	free(lq);//最后将链队列结构体的内存释放
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)</p>
+        <p>3. 入队</p>
+        <p><pre><code class = 'language-c'>
+int EnQueue(LinkQueue*& lq, ElemType x)
+{
+	QType* s;
+	s = (QType*)malloc(sizeof(QType));
+	s->data = x;//将元素x放到s的data域中
+	s->next = NULL;//将s的next指针指向NULL，表示s成为新的尾结点
+	if (lq->front == NULL)
+	{
+		lq->rear = lq->front = s;//如果队列为空，s成为新的头结点和尾结点
+	}
+	else
+	{
+		lq->rear->next = s;//将当前尾结点的next指针指向s，表示s成为新的尾结点
+		lq->rear = s;//将s赋值给lq->rear，表示s成为新的尾结点
+	}
+	return 1;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>4. 出队</p>
+        <p><pre><code class = 'language-c'>
+int DeQueue(LinkQueue*& lq, ElemType& x)
+{
+	QType* p;
+	if (lq->front == NULL)
+	{
+		return 0;//队列为空，无法出队
+	}
+	else
+	{
+		p = lq->front;//p指向当前的队头结点
+		x = p->data;//将队头元素放到x中
+		if (lq->front == lq->rear)//只有一个结点，出队后队列变为空
+		{
+			lq->rear = lq->front = NULL;
+		}
+		else
+		{
+			lq->front = lq->front->next;//将p的下一个结点赋值给lq->front，表示出队成功
+		}
+        free(p);//释放p结点
+        return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>5. 获取队头元素</p>
+        <p><pre><code class = 'language-c'>
+int GetHead(LinkQueue* lq, ElemType& x)
+{
+	if (lq->front == NULL)
+	{
+		return 0;
+	}
+	else
+	{
+		x = lq->front->data;//将队头元素放到x中
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>6. 判断队列是否为空</p>
+        <p><pre><code class = 'language-c'>
+int EmptyQueue(LinkQueue* lq)
+{
+	if (lq->front == NULL)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>函数声明：</p>
+        <p><pre><code class = 'language-c'>
+void InitQueue(LinkQueue*& lq);
+void DestroyQueue(LinkQueue* lq);
+int EnQueue(LinkQueue*& lq, ElemType x);
+int DeQueue(LinkQueue*& lq, ElemType& x);
+int GetHead(LinkQueue* lq, ElemType& x);
+int EmptyQueue(LinkQueue* lq);
+        </code></pre></p>
+        <p>测试6个基本运算：（主函数）</p>
+        <p><pre><code class = 'language-c'>
+int main()
+{
+	LinkQueue* sq;
+	ElemType e;
+
+	printf("初始化队列\\n");
+	InitQueue(sq);
+	printf("队%s\\n", (EmptyQueue(sq) == 1 ? "空" : "不空"));
+	printf("a进队\\n");
+	EnQueue(sq, 'a');
+	printf("b进队\\n");
+	EnQueue(sq, 'b');
+	printf("c进队\\n");
+	EnQueue(sq, 'c');
+	printf("d进队\\n");
+	EnQueue(sq, 'd');
+	printf("队%s\\n", (EmptyQueue(sq) == 1 ? "空" : "不空"));
+	GetHead(sq, e);
+	printf("队头元素：%c\\n", e);
+	printf("出队次序：");
+	while (!EmptyQueue(sq))
+	{
+		DeQueue(sq, e);
+		printf("%c ", e);
+	}
+	printf("\\n");
+	DestroyQueue(sq);
+	return 0;
+}
+        </code></pre></p>
+        <p>本测试的时间复杂度为O(n)</p>
+        <p>输出：</p>
+        <p>初始化队列</p>
+        <p>队空</p>
+        <p>a进队</p>
+        <p>b进队</p>
+        <p>c进队</p>
+        <p>d进队</p>
+        <p>队不空</p>
+        <p>队头元素：a</p>
+        <p>出队次序：a b c d</p>
+    `},
+    {
+        id:"a51",
+        date:"2026年5月1日",
+        category:"数据结构",
+        title:"顺序串（String）",
+        language:"c",
+        fullContent:
+        `<p>字符串（String）是一种线性数据结构，用于存储和处理文本数据。在C语言中，字符串是以空字符'\0'结尾的字符数组。顺序串（String）是一种基于数组实现的字符串数据结构，它提供了一系列操作字符串的算法，如字符串长度计算、字符串连接、字符串比较等。</p>
+        <p>长度为0的字符串称为空串。</p>
+        <p>串可以看作一个特殊的线性表，其特殊性体现在串中元素只能是字符。</p>
+        <p>串中任意个连续的字符组成的子序列称为子串。空串是任何串的子串。</p>
+        <p>数据类型只能是字符型，所以不用使用ElemType来定义。</p>
+        <p>下面是顺序串的实现：</p>
+        <p><pre><code class = 'language-c'>
+#define _CRT_SECURE_NO_WARNINGS
+#define MAX_SIZE 100
+#include &ltstdio.h&gt
+#include &ltstring.h&gt
+
+typedef struct
+{
+	char data[MAX_SIZE];
+	int length;
+}SqString;
+        </code></pre></p>
+        <p>上面的代码定义了顺序串的数据结构，其中包含一个字符数组用于存储字符串内容和一个整数length用于指示字符串的长度。</p>
+        <p>下面是顺序串的基本操作的实现：</p>
+        <p>1. 串赋值</p>
+        <p><pre><code class = 'language-c'>
+void Assign(SqString& s,const char str[])
+{
+	int i = 0;
+	while (str[i] != '\\0')
+	{
+		s.data[i] = str[i];//将str中的字符逐个复制到s.data中
+		i++;
+	}
+	s.length = i;//将字符串的长度赋值给s.length
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入字符串str的长度。</p>
+        <p>2. 串销毁</p>
+        <p><pre><code class = 'language-c'>
+void DestroyStr(SqString s)
+{
+
+}
+        </code></pre></p>
+        <p>3. 串复制</p>
+        <p><pre><code class = 'language-c'>
+void StrCopy(SqString& s, SqString t)
+{
+	int i;
+	for (i = 0; i < t.length; i++)
+	{
+		s.data[i] = t.data[i];
+	}
+	s.length = t.length;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入字符串t的长度。</p>
+        <p>4. 求串长</p>
+        <p><pre><code class = 'language-c'>
+int StrLength(SqString s)
+{
+	return s.length;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(1)</p>
+        <p>5. 判断串相等</p>
+        <p><pre><code class = 'language-c'>
+int StrEqual(SqString s, SqString t)
+{
+	int i = 0;
+	if (s.length != t.length)
+	{
+		return 0;
+	}
+	else
+	{
+		for (i = 0; i < s.length; i++)
+		{
+			if (s.data[i] != t.data[i])
+			{
+				return 0;
+			}
+		}
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入字符串s和t的长度。</p>
+        <p>6. 字符串连接</p>
+        <p><pre><code class = 'language-c'>
+SqString Concat(SqString s, SqString t)
+{
+	SqString r;
+	int i;
+	int j;
+	for (i = 0; i < s.length; i++)
+	{	
+		r.data[i] = s.data[i];
+	}
+	for (j = 0; j < t.length; j++)
+	{
+		r.data[s.length + j] = t.data[j];
+	}
+	r.length = i + j;
+	return r;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入字符串s和t的长度之和。</p>
+        <p>7. 求子串</p>
+        <p><pre><code class = 'language-c'>
+SqString SubStr(SqString s, int i,int j)
+{
+	SqString t;
+	int k;
+	if (i < 1 || i > s.length || j < 1 || i + j > s.length + 1)
+	{
+		t.length = 0;
+	}
+	else
+	{
+		for (k = i - 1; k < i + j - 1; k++)
+		{
+			t.data[k - i + 1] = s.data[k];
+		}
+		t.length = j;
+	}
+	return t;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入字符串s的长度。</p>
+        <p>8.查找子串位置，即串匹配</p>
+        <p><pre><code class = 'language-c'>
+int Index(SqString s, SqString t)
+{
+	int i = 0;
+	int j = 0;
+	while (i < s.length && j < t.length)
+	{
+		if (s.data[i] == t.data[j])
+		{
+			i++;
+			j++;
+		}
+		else
+		{
+			i = i - j + 1;
+			j = 0;
+		}
+	}
+	if (j >= t.length)
+	{
+		return i - t.length + 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(m*n)，其中m和n分别是输入字符串s和t的长度。</p>
+        <p>9. 插入子串</p>
+        <p><pre><code class = 'language-c'>
+int InsStr(SqString& s,int i, SqString t)
+{
+	int j;
+	if (i < 1 || i > s.length + 1 || s.length == MAX_SIZE)
+	{
+		return 0;
+	}
+	else
+	{
+		for (j = s.length - 1; j >= i - 1; j--)
+		{
+			s.data[j + t.length] = s.data[j];
+		}
+		for (j = 0;j < t.length;j++)
+		{
+			s.data[i + j - 1] = t.data[j];
+		}
+		s.length = s.length + t.length;
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入字符串s的长度。</p>
+        <p>10. 删除子串</p>
+        <p><pre><code class = 'language-c'>
+int DelStr(SqString& s, int i, int j)
+{
+	int k;
+	if (i < 1 || i > s.length || j < 1 || i + j > s.length + 1)
+	{
+		return 0;
+	}
+	else
+	{
+		for (k = i + j - 1; k < s.length; k++)
+		{
+			s.data[k - j] = s.data[k];
+		}
+		s.length = s.length - j;
+		return 1;
+	}
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入字符串s的长度。</p>
+        <p>11. 替换子串</p>
+        <p><pre><code class = 'language-c'>
+SqString RepStrAll(SqString s,SqString s1,SqString s2)
+{
+	int i;
+	i = Index(s,s1);
+	while (i > 0)
+	{
+		DelStr(s, i, s1.length);
+		InsStr(s, i,s2);
+		i = Index(s,s1);
+	}
+	return s;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(m*n)，其中m和n分别是输入字符串s和s1的长度。</p>
+        <p>12.输出串</p>
+        <p><pre><code class = 'language-c'>
+void DispStr(SqString s)
+{
+	int i;
+	for (i = 0; i < s.length; i++)
+	{
+		printf("%c",s.data[i]);
+	}
+	printf("\\n");
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入字符串s的长度。</p>
+        <p>函数声明：</p>
+        <p><pre><code class = 'language-c'>
+void Assign(SqString& s, const char str[]);
+void DestroyStr(SqString s);
+void StrCopy(SqString& s,SqString t);
+int StrLength(SqString s);
+int StrEqual(SqString s, SqString t);
+SqString Concat(SqString s, SqString t);
+SqString SubStr(SqString s, int i, int j);
+int Index(SqString s, SqString t);
+int InsStr(SqString& s,int i, SqString t);
+int DelStr(SqString& s, int i, int j);
+SqString RepStrAll(SqString s, SqString s1, SqString s2);
+void DispStr(SqString s);
+        </code></pre></p>
+        <p>测试12个基本运算：（主函数）</p>
+        <p><pre><code class = 'language-c'>
+int main()
+{
+	SqString s1,s2,s3,s4,s5,s6,s7;
+	Assign(s1,"abcd");
+	printf("s1：");
+	DispStr(s1);
+	printf("s1长度：%d\\n",StrLength(s1));
+	printf("s1 => s2\\n");
+	StrCopy(s2, s1);
+	printf("s2: "); 
+	DispStr(s2);
+	printf("s1 和 s2 %s\\n", (StrEqual(s1, s2) == 1 ? "相同" : "不相同"));
+	Assign(s3, "12345678");
+	printf("s3: "); 
+	DispStr(s3);
+	printf("s1 和 s3 连接 => s4\\n");
+	s4 = Concat(s1, s3);
+	printf("s4: "); 
+	DispStr(s4);
+	printf("s3[2..5] => s5\\n");
+	s5 = SubStr(s3, 2, 4);
+	printf("s5: "); 
+	DispStr(s5);
+	Assign(s6, "567");
+	printf("s6: "); 
+	DispStr(s6);
+	printf("s6 在 s3 中位置: %d\\n", Index(s3, s6));
+	printf("从 s3 中删除 s3[3..6]字符\\n");
+	DelStr(s3, 3, 4);
+	printf("s3: "); 
+	DispStr(s3);
+	printf("从 s4 中将 s6 替换成 s1 => s7\\n");
+	s7 = RepStrAll(s4, s6, s1);
+	printf("s7: "); 
+	DispStr(s7);
+	DestroyStr(s1); 
+	DestroyStr(s2);
+	DestroyStr(s3); 
+	DestroyStr(s4);
+	DestroyStr(s5); 
+	DestroyStr(s6);
+	DestroyStr(s7);
+	return 0;
+}
+        </code></pre></p>
+        <p>本测试的时间复杂度为O(n)，其中n是输入字符串s1和s3的长度之和。</p>
+        <p>输出：</p>
+        <p>s1：abcd</p>
+        <p>s1长度：4</p>
+        <p>s1 => s2</p>
+        <p>s2: abcd</p>
+        <p>s1 和 s2 相同</p>
+        <p>s3: 12345678</p>
+        <p>s1 和 s3 连接 => s4</p>
+        <p>s4: abcd12345678</p>
+        <p>s3[2..5] => s5</p>
+        <p>s5: 2345</p>
+        <p>s6: 567</p>
+        <p>s6 在 s3 中位置: 4</p>
+        <p>从 s3 中删除 s3[3..6]字符</p>
+        <p>s3: 1238</p>
+        <p>从 s4 中将 s6 替换成 s1 => s7</p>
+        <p>s7: abcd1234abcd78</p>
+    `},
+    {
+        id:"a52",
+        date:"2026年5月3日",
+        category:"数据结构",
+        title:"链串（Linked String）",
+        language:"c",
+        fullContent:
+        `<p>链串（Linked String）是一种基于链表实现的字符串数据结构。与顺序串不同，链串中的每个字符都存储在单独的节点中，通过指针连接起来。</p>
+        <p>链串的基本操作包括创建链串、销毁链串、计算链串长度、连接链串等算法。由于链串的实现基于链表，因此在操作链串时需要考虑节点的动态分配和释放。</p>
+        <p>链串的定义如下：</p>
+        <p><pre><code class = 'language-c'>
+#define _CRT_SECURE_NO_WARNINGS
+#include &ltstdio.h&gt
+#include &ltstring.h&gt
+#include &ltstdlib.h&gt
+
+typedef struct node
+{
+	struct node* next;
+	char data;
+}LinkString;
+        </code></pre></p>
+        <p>上面的代码定义了链串的数据结构，其中包含一个字符数据域用于存储字符串中的字符和一个指针域用于指向下一个节点。</p>
+        <p>1. 串赋值</p>
+        <p><pre><code class = 'language-c'>
+void Assign(LinkString*& s, char str[])
+{
+	int i = 0;
+	LinkString* p;//新结点
+	LinkString* tc;//尾指针
+
+	s = (LinkString*)malloc(sizeof(LinkString));
+	tc = s;//尾指针指向首结点
+
+	while (str[i] != '\\0')
+	{
+		p = (LinkString*)malloc(sizeof(LinkString));
+		p->data = str[i];
+		tc->next = p;
+		tc = p;
+		i++;
+	}
+	tc->next = NULL;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入字符串str的长度。</p>
+        <p>2. 串销毁</p>
+        <p><pre><code class = 'language-c'>
+void DestroyStr(LinkString*& s)
+{
+	LinkString* pre = s;
+	LinkString* p = pre->next;
+	while (p != NULL)
+	{
+		free(pre);
+		pre = p;
+		p = p->next;
+	}
+	free(pre);
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是链串s的长度。</p>
+        <p>3. 串复制</p>
+        <p><pre><code class = 'language-c'>
+void StrCopy(LinkString*& s, LinkString* t)
+{
+	LinkString* p;
+	LinkString* q;
+	LinkString* tc;
+	p = t->next;
+	s = (LinkString*)malloc(sizeof(LinkString));
+	tc = s;
+	while (p != NULL)
+	{
+		q = (LinkString*)malloc(sizeof(LinkString));
+		q->data = p->data;
+		tc->next = q;
+		tc = q;
+		p = p->next;
+	}
+	tc->next = NULL;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入链串t的长度。</p>
+        <p>4. 串长度</p>
+        <p><pre><code class = 'language-c'>
+int GetLength(LinkString* s)
+{
+	int n = 0;
+	LinkString* p;
+	p = s->next;
+	while (p != NULL)
+	{
+		n++;
+		p = p->next;
+	}
+	return n;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入链串s的长度。</p>
+        <p>5. 串相等</p>
+        <p><pre><code class = 'language-c'>
+int StrEqual(LinkString* s, LinkString* t)
+{
+	LinkString* p;
+	LinkString* q;
+
+	p = s->next;
+	q = t->next;
+
+	while (p != NULL && q != NULL)
+	{
+		if (p->data != q->data)
+		{
+			return 0;
+		}
+		p = p->next;
+		q = q->next;
+	}
+
+	if (p != NULL || q != NULL)
+	{
+		return 0;
+	}
+	return 1;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入链串s和t的长度之和。</p>
+        <p>6. 串连接</p>
+        <p><pre><code class = 'language-c'>
+LinkString* Concat(LinkString* s, LinkString* t)
+{
+	LinkString* p;
+	LinkString* q;
+	LinkString* tc;
+	LinkString* r;
+	p = s->next;
+	r = (LinkString*)malloc(sizeof(LinkString));
+	tc = r;
+	while (p != NULL)
+	{
+		q = (LinkString*)malloc(sizeof(LinkString));
+		q->data = p->data;
+		tc->next = q;
+		tc = q;
+		p = p->next;
+	}
+	p = t->next;
+	while (p != NULL)
+	{
+		q = (LinkString*)malloc(sizeof(LinkString));
+		q->data = p->data;
+		tc->next = q;
+		tc = q;
+		p = p->next;
+	}
+	tc->next = NULL;
+	return r;
+}
+        </code></pre></p>
+        <p>本算法的时间复杂度为O(n)，其中n是输入链串s和t的长度之和。</p>
+        <p>7. 求子串</p>
+        <p><pre><code class = 'language-c'>
+    `},
+    {
+        id:"a53",
+        date:"2026年5月5日",
+        category:"数据结构",
+        title:"字符串模式匹配算法",
+        language:"c",
+        fullContent:
+        `<p>字符串模式匹配算法是一类用于在文本中查找特定模式（子串）的算法。常见的字符串模式匹配算法包括暴力匹配算法、KMP算法、Boyer-Moore算法等。这些算法通过不同的策略和优化技术，提高了字符串匹配的效率，广泛应用于文本搜索、数据挖掘等领域。</p>
+    `},
+    {
+        id:"a54",
+        date:"2026年5月7日",
+        category:"数据结构",
+        title:"数组与稀疏矩阵",
+        language:"c",
+        fullContent:
+        `<p>数组是一种线性数据结构，用于存储固定大小的元素集合。稀疏矩阵是一种特殊的矩阵，其中大部分元素为零。为了节省存储空间和提高计算效率，稀疏矩阵通常使用特殊的数据结构来存储非零元素的位置和值，如压缩行存储（CSR）或压缩列存储（CSC）等。</p>
+        <p>1. 数组的定义</p>
+        <p>一维数组是n(n > 1)个相同性质的数据元素构成的有限序列，它本身就是一个线性表。</p>
+        <p>二维数组可以看成是这样的一个线性表，它的每个数据元素也是一个线性表。结构类似矩阵</p>
+        <p>几乎所有的高级语言都实现了数组数据结构，称为数组类型。</p>
+        <p><ol style= "list-style:none">
+            <li>①一个数组中所有元素具有相同的数据类型。</li>
+            <li>②数组一旦被定义，他的维数和每维的大小就不再改变。</li>
+            <li>③数组中每个元素对应唯一的下标，可以通过该下标对元素进行存取操作。</li>
+        </ol></p>
+        <p>&nbsp;</p>
+        <p>2. 数组的存储结构</p>
+        <p>通常为顺序结构，因为数组一般不作插入删除运算。</p>
+        <p>存储次序：</p>
+        <p>二维数组的存储次序有两种情况：按行优先和按列优先。</p>
+        <p>(1). 首先来说按行优先：</p>
+        <p>假设每个元素占k个存储单元，LOC(a<sub>0,0</sub>)表示a<sub>0,0</sub>元素的存储地址，对于元素a<sub>i,j</sub>来说，它的地址是：</p>
+        <p>LOC(a<sub>i,j</sub>) = LOC(a<sub>0,0</sub>) + (i * n + j) * k</p>
+        <p>位置 = 起始地址 + (i * 每行的n个元素(<u>是乘个数，而不是累乘元素</u>) + j ) * k(k是每个元素占的存储单元)</p>
+        <p>(2). 按列优先：</p>
+        <p>LOC(a<sub>i,j</sub>) = LOC(a<sub>0,0</sub>) + (j * m + i) * k</p>
+        <p>m:列的元素个数</p>
+        <p>&nbsp;</p>
+        <p>3. 特殊矩阵的压缩矩阵</p>
+        <p>特殊矩阵：零元素或非零元素的分布有一定规律的矩阵。主要形式有：对称矩阵，对角矩阵等，它们都是方阵（行列数相等）。</p>
+        <p>对称矩阵：若一个方阵A = {a<sub>i,j</sub>}中的元素满足a<sub>i,j</sub> = a<sub>j,i</sub>(0 <= i,j <= n-1),则称其为n阶对称矩阵。</p>
+        <p>可分为三个部分：上三角部分(i < j)，下三角部分(i > j)，主对角线部分(i = j)</p>
+        <p>对于A中任一元素a<sub>i,j</sub>和B中元素b<sub>k</sub>之间存在如下对应关系：</p>
+        <p>
+        <math display="block">
+            <mi>k</mi>
+            <mo>=</mo>
+            <mrow>
+            <mo>{</mo>
+            <mtable columnalign="left left" rowspacing="4pt">
+                <mtr>
+                <mtd>
+                    i(i + 1)/2 + j
+                </mtd>
+                <mtd>
+                    <mtext>&nbsp;当 </mtext>
+                    i≥j
+                    <mtext>时 </mtext>
+                </mtd>
+                </mtr>
+                <mtr>
+                <mtd>
+                    j(j + 1)/2 + i
+                </mtd>
+                <mtd>
+                    <mtext>&nbsp;当 </mtext>
+                    i < j
+                    <mtext>时 </mtext>
+                </mtd>
+                </mtr>
+            </mtable>
+            </mrow>
+        </math>
+        </p>
+        <p>有些非对称的矩阵也可借用上述方法存储，如n阶下（上）三角矩阵。所谓n阶下（上）三角矩阵，是指矩阵的上（下）三角部分（不包括主对角线）中的元素均为常数c的n阶方阵。</p>
+        <p>设以一维数组B = {b<sub>k</sub>}作为n阶三角矩阵A的存储结构，B中元素的个数为n(n + 1)/2 + 1(其中常数c占用一个元素空间),则A中任意元素a<sub>i,j</sub>和B中元素b<sub>k</sub>之间存在着如下对应关系:</p>
+        <p>上三角矩阵：</p>
+        <p>
+        <math display="block">
+            <mi>k</mi>
+            <mo>=</mo>
+            <mrow>
+            <mo>{</mo>
+            <mtable columnalign="left left" rowspacing="4pt">
+                <mtr>
+                <mtd>
+                    i(2n - i + 1)/2 + j - i
+                </mtd>
+                <mtd>
+                    <mtext>&nbsp;当 </mtext>
+                    i ≤ j
+                    <mtext>时 </mtext>
+                </mtd>
+                </mtr>
+                <mtr>
+                <mtd>
+                    n(n + 1)/2
+                </mtd>
+                <mtd>
+                    <mtext>&nbsp;当 </mtext>
+                    i > j
+                    <mtext>时 </mtext>
+                </mtd>
+                </mtr>
+            </mtable>
+            </mrow>
+        </math>
+        </p>
+        <p>下三角矩阵：</p>
+        <p>
+        <math display="block">
+            <mi>k</mi>
+            <mo>=</mo>
+            <mrow>
+            <mo>{</mo>
+            <mtable columnalign="left left" rowspacing="4pt">
+                <mtr>
+                <mtd>
+                    i(i + 1)/2 + j
+                </mtd>
+                <mtd>
+                    <mtext>&nbsp;当 </mtext>
+                    i≥j
+                    <mtext>时 </mtext>
+                </mtd>
+                </mtr>
+                <mtr>
+                <mtd>
+                    n(n + 1)/2
+                </mtd>
+                <mtd>
+                    <mtext>&nbsp;当 </mtext>
+                    i < j
+                    <mtext>时 </mtext>
+                </mtd>
+                </mtr>
+            </mtable>
+            </mrow>
+        </math>
+        </p>
+        <p>其中，B的最后元素b<sub>n(n + 1)/2</sub>中存放常数c。</p>
+        <p>&nbsp;</p>
+        <p>4. 稀疏矩阵</p>
+        <p>稀疏矩阵：一个阶数较大的矩阵中非零元素的个数s相对于矩阵元素的总个数t非常小时的矩阵。</p>
+        <p>稀疏矩阵的压缩存储方法是只存储非零元素，主要有三元组和十字链表。</p>
+    `},
+    {
+        id:"a55",
+        date:"2026年5月9日",
+        category:"数据结构",
+        title:"树（Tree）",
+        language:"c",
+        fullContent:
+        `<p>1. 树的定义：</p>
+        <p>树（Tree）是一种非线性数据结构，由节点组成，其中每个节点包含一个数据元素和指向其子节点的指针。树具有层次结构，常用于表示具有父子关系的数据，如文件系统、组织结构等。树的基本操作包括插入、删除、遍历等算法。</p>
+        <p>从数据结构角度来说，树是一种层次化的数据结构，它由节点和边组成，其中每个节点可以有零个或多个子节点，但只有一个父节点（除了根节点）。</p>
+        <p>树包含n(n>=0)个结点,当n=0时，树为空树。</p>
+        <p>树的基本概念：</p>
+        <p>（1）根节点（Root）：树的顶层节点，没有父节点。</p>
+        <p>（2）内部节点（Internal Node）：具有至少一个子节点的节点。</p>
+        <p>（3）路径（Path）：从一个节点到另一个节点的节点序列。</p>
+        <p>（4）子树（Subtree）：树中某个节点及其所有后代节点组成的树。</p>
+        <p>&nbsp;</p>
+        <p>2. 树的逻辑结构表示：</p>
+        <p>有树状表示法、文氏图表示法、凹入表示法和括号表示法等。</p>
+        <p>&nbsp;</p>
+        <p>3. 树的基本术语：</p>
+        <p><ol style= "list-style:none">
+            <li>(1)结点的度：节点拥有的子节点数。</li>
+            <li>(2)树的度：树中节点的最大子节点数。</li>
+            <li>(3)分支结点：具有子节点（度大于0）的节点。</li>
+            <li>(4)叶子结点(叶结点)：没有子节点（度为0）的节点，也被称为终端节点。</li>
+            <li>(5)孩子结点：某个节点的后继称为该结点的孩子结点。</li>
+            <li>(6)双亲结点（父亲结点）：一个结点称为其后继结点的双亲结点。</li>
+            <li>(7)子孙结点：一个结点的子树中除该结点外的所有节点。</li>
+            <li>(8)祖先结点：某个节点的所有前驱节点（不包括自己）。</li>
+            <li>(9)兄弟结点：具有相同父亲节点的节点，互相称为兄弟结点。</li>
+            <li>(10)结点层次（结点深度）：从根节点到某个节点的路径长度。</li>
+            <li>(11)树的高度：从根节点到叶子节点的最长路径长度。</li>
+            <li>(12)森林：由0棵或多棵互不相交的树组成的集合。</li>
+        </ol></p>
+        <p>&nbsp;</p>
+        <p>4. 树的性质</p>
+        <p>(1) 树中的结点数等于所有结点的度数之和加1。</p>
+        <p>(2) 度为m的树中第i层上至多有m<sup>i-1</sup>个结点。</p>
+        <p>所以，当一棵m次树的第i层有m<sup>i-1</sup>个结点时，称该层是满的，若一棵m次树的所有叶子结点在同一层，并且每一层都是满的，则称该树为满m次树。</p>
+        <p>(3) 高度为h的m次树最多有(m<sup>h</sup>-1)/(m-1)个结点。</p>
+        <p>所以，当一棵高度为h的m次树上的结点数等于(m<sup>h</sup>-1)/(m-1)时，称该层是满的，则称该树为满m次树。</p>
+        <p>&nbsp;</p>
+        <p>5. 树的基本运算</p>
+        <p>树的运算主要分为以下三类：</p>
+        <p>(1) 查找满足某种特定关系的结点</p>
+        <p>(2) 插入或删除某个结点</p>
+        <p>(3) 遍历树的结点</p>
+        <p>其中，遍历运算主要有先根遍历、层次遍历和后根遍历。</p>
+        <p>先根遍历：访问根节点，然后递归地访问左子树和右子树。</p>
+        <p>层次遍历：按树的层次从上到下，从左到右访问节点。</p>
+        <p>后根遍历：递归地访问左子树和右子树，然后访问根节点。</p>
+        <p>&nbsp;</p>
+        <p>6. 树的存储结构</p>
+        <p>在计算机中存储一棵树，不仅要存储树中每个结点的值，还要存储结点与结点之间的关系。</p>
+        <p>下面介绍三种常用的存储结构：</p>
+        <p>(1) 双亲存储结构：用一个一维数组存储树中的各个结点，数组元素是一个记录，包含data和parent两个域，分别表示结点值和其双亲在数组中的下标。在这个一维数组中，树中结点可按任意顺序存放。</p>
+        <p>在双亲存储结构中，找某个结点的双亲或祖先是很方便的，但要找某个结点的孩子或兄弟结点则较耗时，需要遍历整个数组。</p>
+        <p>(2) 孩子链存储结构：在这种存储结构中，每个结点不仅包含结点值，还包括指向所有孩子结点的指针。由于树中每个结点的子树个数（即结点的度）可能不同，如果按各个结点的度设计变长结构，则每个结点的孩子结点指针域个数增加使算法实现非常麻烦。孩子链存储结构可按树的度（即树中所有结点的最大度数）设计结点的孩子结点指针域个数。</p>
+        <p>显然，在孩子链存储结构中，查找某个结点的孩子结点很容易，但找结点的双亲结点则较耗时；而且当树的度较大时，这种存储结构十分耗费空间。</p>
+        <p>(3) 孩子兄弟链存储结构：孩子兄弟链存储结构是一种二叉链表，链表中每个结点包含两个指针，分别指向对应结点的第一个孩子和下一个兄弟。</p>
+        <p>孩子兄弟链存储结构的优点、缺点和孩子链存储结构的优缺点一样，查找双亲比较耗时，查找孩子结点比较容易，但由于每个结点只有两个指针域，较孩子链存储结构节省空间。</p>
+    `},
+    {
+        id:"a55",
+        date:"2026年5月9日",
+        category:"数据结构",
+        title:"二叉树（Binary Tree）",
+        language:"c",
+        fullContent:
+        `<p>二叉树是一种简单且重要的树形结构，尽管它和前面介绍的树都属于树形结构，但相互之间没有包含关系，不能把二叉树看成一种特殊的树。</p>
+        <p>二叉树的递归定义为：二叉树或者是一棵空树，或者是一棵由一个根节点和两棵互不相交的左右子树组成。所组成的非空树，左子树和右子树又同样都是一棵二叉树。</p>
+    `},
+    {
+        id:"a70",
+        date:"2026年4月26日",
+        category:"C",
+        title:"C语言基础",
+        language:"c",
+        fullContent:
+        `<p>C语言是一种通用的、过程式的编程语言，由丹尼斯·里奇在1972年开发。它以其高效性和灵活性而闻名，广泛应用于系统软件和嵌入式系统开发中。</p>
+        <p>C语言具有简洁、高效、可移植性强等优点，是学习计算机科学和软件工程的重要基础。</p>
+        <p>C语言的基本语法包括变量声明、数据类型、控制结构、函数定义和调用等。C语言支持多种数据类型，如整数、浮点数、字符等，并提供了丰富的运算符和库函数。</p>
+        <p>C语言的控制结构包括条件语句（if、else）、循环语句（for、while、do-while）和跳转语句（break、continue、goto）。函数是C语言的基本模块化单位，支持递归调用和参数传递。</p>
+        <p>C语言还提供了指针机制，使得程序员可以直接操作内存，提高了程序的效率和灵活性。C语言的标准库提供了丰富的函数，用于处理字符串、文件操作、内存管理等常见任务。</p>
+        <p>总之，C语言是一种功能强大、效率高的编程语言，适用于各种应用领域，是计算机科学和软件开发的重要工具，也是其他编程语言的基础。</p>
+        <p>举个例子：</p>
+        <p><pre><code class = 'language-c'>
+#include &ltstdio.h&gt//这是C语言的头文件，包含了输入输出函数的声明
+int main()//主函数，是C语言程序的入口点
+{
+    printf("Hello, World!\\n");//使用printf函数输出字符串到控制台，\\n表示换行
+    return 0;//返回0表示程序正常结束
+}
+        </code></pre></p>
+        <p>上面的代码是一个简单的C语言程序，它包含了一个main函数，使用printf函数输出了"Hello, World!"到控制台，并返回0表示程序正常结束。</p>
+    `},
+    {
+        id:"a71",
+        date:"2026年4月27日",
+        category:"C",
+        title:"C语言中的数据类型，关键字和注释",
+        language:"c",
+        fullContent:
+        `<p>1. C语言中的数据类型是用来定义变量的类型和大小的。C语言提供了多种基本数据类型，包括整数类型、浮点类型、字符类型等。</p>
+        <p>整数类型包括int、short、long等，用于存储整数值。浮点类型包括float和double，用于存储小数值。字符类型是char，用于存储单个字符。</p>
+        <p>C语言还支持派生数据类型，如数组、结构体、联合体和枚举类型。数组用于存储一组相同类型的元素，结构体用于定义一个包含多个不同类型成员的数据结构，联合体用于定义一个可以存储不同类型数据的变量，枚举类型用于定义一组命名的整数常量。</p>
+        <p>此外，C语言还提供了void类型，用于表示无类型或函数不返回值的情况。指针类型也是C语言中的重要数据类型，用于存储变量的地址。</p>
+        <p>总之，C语言中的数据类型丰富多样，提供了灵活的方式来定义和操作不同类型的数据，是C语言编程的基础。</p>
+        <p>举个例子：</p>
+        <p><pre><code class = 'language-c'>
+#include &ltstdio.h&gt
+int main()
+{
+    int a = 5; // 定义一个整型变量a并赋值为5
+    float b = 3.14; // 定义一个浮点型变量b并赋值为3.14
+    char c = 'A'; // 定义一个字符型变量c并赋值为'A'
+    printf("a = %d, b = %f, c = %c\\n", a, b, c); // 输出变量的值
+    return 0;
+}
+        </code></pre></p>
+        <p>上面的代码展示了C语言中不同类型变量的定义和使用方法。</p>
+        <p>&nbsp;</p>
+        <p>2. C语言的关键字包括：break、case、char、const、continue、default、do、double、else、enum、extern、float、for、goto、if、int、long、return、short、signed、sizeof、static、struct、switch、typedef、unsigned、void、while</p>
+        <p>这些关键字在C语言中具有特殊的意义，不能用作变量名或函数名。</p>
+        <p>&nbsp;</p>
+        <p>3. C语言中的注释有两种形式：单行注释和多行注释。单行注释以//开头，表示该行后面的内容是注释；多行注释以/*开头，以*/结尾，表示其中的内容都是注释。</p>
+        <p>注释用于解释代码的功能和逻辑，帮助程序员理解代码的意图和实现细节。良好的注释可以提高代码的可读性和维护性。</p>
+        <p>举个例子：</p>
+        <p><pre><code class = 'language-c'>
+#include &ltstdio.h&gt
+int main()
+{
+    // 这是一个单行注释
+    int a = 5; /* 这是一个多行注释 */
+    printf("a = %d\\n", a);
+    return 0;
+}
+        </code></pre></p>
+        <p>上面的代码展示了C语言中单行注释和多行注释的使用方法。</p>
+    `},
+    {
+        id:"a72",
+        date:"2026年4月28日",
+        category:"C",
+        title:"C语言中的运算符和表达式",
+        language:"c",
+        fullContent:
+        `<p>C语言中的运算符是用来执行特定操作的符号或关键字。C语言提供了丰富的运算符，包括算术运算符、关系运算符、逻辑运算符、位运算符、赋值运算符等。</p>
+        <p>算术运算符包括+、-、*、/、%等，用于执行基本的数学运算。关系运算符包括==、!=、>、<、>=、<=等，用于比较两个值的关系。逻辑运算符包括&&、||、!等，用于执行逻辑操作。位运算符包括&、|、^、~、<<、>>等，用于操作二进制位。赋值运算符包括=、+=、-=、*=、/=等，用于给变量赋值或进行复合赋值。</p>
+        <p>&nbsp;</p>
+        <p>表达式是由运算符和操作数组成的组合，用于计算一个值。C语言中的表达式可以是简单的变量或常量，也可以是复杂的函数调用或嵌套的表达式。表达式的求值顺序由运算符的优先级和结合性决定。</p>
+        <p>C语言中的运算符和表达式是构建程序逻辑和实现功能的基础，理解它们的使用方法和规则对于编写高效、正确的C语言程序至关重要。</p>
+        <p>举个例子：</p>
+        <p><pre><code class = 'language-c'>
+#include &ltstdio.h&gt
+int main()
+{
+    int a = 5;
+    int b = 10;
+    int c = a + b; // 使用算术运算符
+    printf("c = %d\\n", c);
+    return 0;
+}
+        </code></pre></p>
+        <p>上面的代码展示了C语言中运算符和表达式的使用方法。</p>
+    `},
+    {
+        id:"a73",
+        date:"2026年4月29日",
+        category:"C",
+        title:"C语言中的输入输出函数,格式说明符和格式化输出以及符号常量",
+        language:"c",
+        fullContent:
+        `<p>C语言中的输入输出函数是用来与用户进行交互的函数。常用的输入输出函数包括printf和scanf。</p>
+        <p>printf函数用于向控制台输出格式化的数据。它的语法是printf("格式字符串", 参数列表);。格式字符串中可以包含普通字符和格式说明符，用于指定输出数据的格式。</p>
+        <p>scanf函数用于从控制台读取格式化的数据。它的语法是scanf("格式字符串", 参数列表);。格式字符串中可以包含普通字符和格式说明符，用于指定输入数据的格式。</p>
+        <p>举个例子：</p>
+        <p><pre><code class = 'language-c'>
+#include &ltstdio.h&gt
+int main()
+{
+    int a;
+    printf("请输入一个整数: ");
+    scanf("%d", &a);//使用scanf函数读取一个整数，并将其存储在变量a中,%d表示输入的整数类型，&a表示变量a的地址
+    printf("您输入的整数是: %d\\n", a);
+    return 0;
+}
+        </code></pre></p>
+        <p>上面的代码展示了C语言中输入输出函数的使用方法。</p>
+        <p>除了上面的%d,还有%f、%c、%s、%lf等格式说明符。%f表示输入的浮点数类型，%c表示输入的字符类型，%s表示输入的字符串类型，%lf表示输入的双精度浮点数类型。</p>
+        <p>%5.2f表示输出一个浮点数，总宽度为5个字符，小数部分占2个字符，右对齐。而%-5.2f表示左对齐。</p>
+        <p>一般情况下，输入的多个数据之间用空格或换行符分隔。</p>
+    `},
+    {
+        id:"a74",
+        date:"2026年4月30日",
+        category:"C",
+        title:"C语言中的符号常量和转义字符",
+        language:"c",
+        fullContent:
+        `<p>符号常量是用#define预处理指令定义的常量值。它们在程序中具有固定的值，不能被修改。符号常量通常用于提高代码的可读性和维护性。</p>
+        <p>举个例子：</p>
+        <p><pre><code class = 'language-c'>
+#include &ltstdio.h&gt
+#define PI 3.14159//定义一个符号常量PI，表示圆周率的值
+int main()
+{
+    float radius = 5.0;
+    float area = PI * radius * radius;
+    printf("圆的面积是: %f\\n", area);
+    return 0;
+}
+        </code></pre></p>
+        <p>上面的代码展示了C语言中符号常量的使用方法。</p>
+        <p>语法结构是：<code>#define 符号常量名 常量值</code></p>
+        <p>&nbsp;</p>
+        <p>转义字符是用来表示一些特殊字符的字符序列。常见的转义字符包括\\n（换行符）、\\t（制表符）、\\\\（反斜杠）、\\\"（双引号）等。转义字符在字符串中使用时会被解释为对应的特殊字符。</p>
+        <p>举个例子：</p>
+        <p><pre><code class = 'language-c'>
+#include &ltstdio.h&gt
+int main()
+{
+    printf("Hello, World!\\n"); // 输出Hello, World!并换行
+    printf("这是一个制表符:\\t"); // 输出制表符
+    printf("这是一个反斜杠: \\"); // 输出反斜杠
+    printf("这是一个双引号: \""); // 输出双引号
+    return 0;
+}
+        </code></pre></p>
+        <p>上面的代码展示了C语言中转义字符的使用方法。</p>
+        <p>还有其他的转义字符，如\\r（回车符）、\\b（退格符）等，需要的可以自行查找，学习和使用。</p>
+    `},
+    {
+        id:"a150",
+        date:"2026年6月30日",
+        category: "C++",
+        title: "第一个c++程序",
+        language: "cpp",
+        fullContent:
+        `<p>c++不仅包含了c语言的语法，并且还有它自己的语法。比如说，输出最简单的Hello World时，在c语言中是这样的：</p>
+        <p><pre><code class = 'language-c'>
+#include &ltstdio.h&gt
+int main()
+{
+    printf("Hello, World!\\n");
+    return 0;
+}
+        </code></pre></p>
+        <p>但在c++是这样的：</p>
+        <p><pre><code class = 'language-cpp'>
+#include &ltiostream&gt
+using namespace std;
+int main()
+{   //使用了命名空间std，直接使用cout输出，不需要printf函数
+    //还有一个版本是不用命名空间的，直接使用std::cout输出
+    cout << "Hello, World!" << endl;
+    return 0;
+}
+        </code></pre></p>
+        <p><pre><code class = 'language-cpp'>
+#include &ltiostream&gt
+int main()
+{
+    std::cout << "Hello, World!" << std::endl;
+    return 0;
+}
+        </code></pre></p>
+        <p>可以看出，c++引入了命名空间（namespace）和输入输出流（iostream），使得代码更简洁和现代化。这只是c++相对于c的一个小改进，后续我们还会看到更多的特性和改进。</p>
+    `},
+    ];
+
+    function getCategoryIcon(category) {
+    switch(category) {
+        case 'Java': return '<i class="fab fa-java"></i>';
+        case 'Python': return '<i class="fab fa-python"></i>';
+        case 'C': return '<i class="fas fa-code"></i>';
+        case 'C++': return '<i class="fab fa-cuttlefish"></i>';
+        case '数据结构': return '<i class="fas fa-project-diagram"></i>';
+        case 'MySQL': return '<i class="fas fa-database"></i>';
+        default: return '<i class="fas fa-book"></i>';
+        }
+    }   
+
+    function renderUnifiedArticles() {
+        const searchTerm = document.getElementById('articleSearchInput')?.value.toLowerCase() || '';
+        const category = document.getElementById('articleCategorySelect')?.value || 'all';
+        
+        let filtered = unifiedArticles.filter(article => {
+            const matchSearch = article.title.toLowerCase().includes(searchTerm) || 
+                                article.fullContent.toLowerCase().includes(searchTerm);
+            const matchCategory = category === 'all' || article.category === category;
+            return matchSearch && matchCategory;
+        });
+        
+        const grid = document.getElementById('articlesGrid');
+        if (!grid) return;
+        
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div class="empty-placeholder"><i class="fas fa-search fa-2x"></i><p>没有找到相关文章 ~</p><small style="color:#6a5e4a;">试试其他关键词吧 ✨</small></div>`;
+            return;
+        }
+        
+        // 卡片只显示标题、日期、分类
+        grid.innerHTML = filtered.map(article => `
+            <div class="article-card" data-id="${article.id}">
+                <div class="card-header">
+                    <span class="category-badge">${getCategoryIcon(article.category)} ${article.category}</span>
+                    <span class="date-tag"><i class="far fa-calendar-alt"></i> ${article.date}</span>
+                </div>
+                <div class="article-title">📘 ${escapeHtml(article.title)}</div>
+                <div class="read-hint">
+                    <i class="fas fa-arrow-right"></i> 点击阅读全文
+                </div>
+            </div>
+        `).join('');
+        
+        // 绑定点击事件
+        document.querySelectorAll('.article-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const id = card.getAttribute('data-id');
+                const article = unifiedArticles.find(a => a.id === id);
+                if (article) {
+                    document.getElementById('readerTitle').innerHTML = `${getCategoryIcon(article.category)} ${article.title}`;
+                    document.getElementById('readerBody').innerHTML = `
+                        <div style="margin-bottom:1rem; color:#ffcd94;">
+                            <i class="far fa-calendar"></i> ${article.date} &nbsp;|&nbsp;
+                            <i class="fas fa-tag"></i> ${article.category}
+                        </div>
+                        ${article.fullContent}
+                    `;
+                    // 高亮模态框中的代码
+                    setTimeout(() => {
+                        document.querySelectorAll('#readerBody pre code').forEach(block => hljs.highlightElement(block));
+                    }, 10);
+                    document.getElementById('articleReaderModal').style.display = 'flex';
+                }
+            });
+        });
+    }
+
+    // ==================== 页面切换 ====================
+    const homeScreen = document.getElementById('homeScreen');
+    const pages = { 
+        articles: document.getElementById('articlesPage'), 
+        about: document.getElementById('aboutPage'), 
+        friends: document.getElementById('friendsPage') 
+    };
+    
+    function showHome() { 
+        homeScreen.style.display = 'flex'; 
+        Object.values(pages).forEach(p => p.classList.remove('active-page')); 
+        if(!hasLoadedOnce) setProgressFull(); 
+        updateProgressUI(100); 
+        welcomeDiv.classList.add('show'); 
+    }
+    
+    function showPage(pageId) { 
+        homeScreen.style.display = 'none'; 
+        Object.values(pages).forEach(p => p.classList.remove('active-page')); 
+        if(pages[pageId]) pages[pageId].classList.add('active-page'); 
+        if(pageId === 'friends') renderFriendsListSub(); 
+        if(pageId === 'articles') renderUnifiedArticles(); 
+    }
+    
+    document.querySelectorAll('.blog-entry-btn').forEach(btn => { 
+        btn.addEventListener('click', () => { 
+            const nav = btn.getAttribute('data-nav'); 
+            showPage(nav); 
+        }); 
+    });
+    
+    document.querySelectorAll('[data-backhome]').forEach(btn => { 
+        btn.addEventListener('click', () => { showHome(); }); 
+    });
+
+    // ==================== 模态框事件 ====================
+    const addModal = document.getElementById('addFriendModal');
+    const openBtn = document.getElementById('openAddModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const confirmBtn = document.getElementById('confirmAddFriendBtn');
+    
+    if(openBtn) openBtn.onclick = () => addModal.style.display = 'flex';
+    if(closeModalBtn) closeModalBtn.onclick = () => addModal.style.display = 'none';
+    if(confirmBtn) confirmBtn.onclick = async () => {
+        let name = document.getElementById('modalFriendName').value;
+        let url = document.getElementById('modalFriendUrl').value;
+        if(await addFriendWithVerify(name, url)) {
+            addModal.style.display = 'none';
+            document.getElementById('modalFriendName').value = '';
+            document.getElementById('modalFriendUrl').value = '';
+            if(pages.friends.classList.contains('active-page')) renderFriendsListSub(document.getElementById('friendSearchInput')?.value || '');
+        }
+    };
+    addModal.addEventListener('click', (e) => { if(e.target === addModal) addModal.style.display = 'none'; });
+    
+    const closeReaderBtn = document.getElementById('closeReaderBtn');
+    const readerModal = document.getElementById('articleReaderModal');
+    if(closeReaderBtn) closeReaderBtn.onclick = () => readerModal.style.display = 'none';
+    if(readerModal) readerModal.addEventListener('click', (e) => { if(e.target === readerModal) readerModal.style.display = 'none'; });
+    
+    if(document.getElementById('friendSearchInput')) {
+        document.getElementById('friendSearchInput').addEventListener('input', (e) => renderFriendsListSub(e.target.value));
+    }
+    
+    // 文章筛选事件
+    if(document.getElementById('articleSearchInput')) {
+        document.getElementById('articleSearchInput').addEventListener('input', renderUnifiedArticles);
+        document.getElementById('clearSearchBtn').addEventListener('click', () => {
+            document.getElementById('articleSearchInput').value = '';
+            renderUnifiedArticles();
+        });
+        document.getElementById('articleCategorySelect').addEventListener('change', renderUnifiedArticles);
+    }
+
+    // 启动
+    loadFriends();
+    startFirstLoadAnimation();
+    showHome();
+</script>
+</body>
+</html>
